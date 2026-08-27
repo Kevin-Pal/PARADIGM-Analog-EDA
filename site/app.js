@@ -1,10 +1,14 @@
 (() => {
   "use strict";
 
+  // `betterWhenLarger: false` means the axis is drawn reversed, so that "further along
+  // the axis" always means "better design" no matter which metric is selected. Ticks keep
+  // their true values; only the direction flips. This mirrors the convention used for the
+  // figures in the paper, where every axis is oriented so that increasing means improving.
   const metrics = {
-    g: { label: "DC gain", unit: "dB", short: "Gain" },
-    b: { label: "Gain-bandwidth product", unit: "MHz", short: "GBW" },
-    p: { label: "Power dissipation", unit: "mW", short: "Pdiss" },
+    g: { label: "DC gain", unit: "dB", short: "Gain", betterWhenLarger: true },
+    b: { label: "Gain-bandwidth product", unit: "MHz", short: "GBW", betterWhenLarger: true },
+    p: { label: "Power dissipation", unit: "mW", short: "Pdiss", betterWhenLarger: false },
   };
 
   const topologyOrder = ["SMC", "NGCC", "DFCFC1", "TCFC", "IAC", "NMCNR", "AZC"];
@@ -122,6 +126,14 @@
     return points.filter((point) => visibleTopologies.has(point.c) && (!paretoOnly.checked || point.o === 1));
   }
 
+  // Axis captions carry the direction, because a reversed axis is otherwise easy to misread.
+  function axisTitle(key, mode) {
+    const m = metrics[key];
+    const scale = mode === "log" ? " · log" : "";
+    const sense = m.betterWhenLarger ? "" : ", lower is better";
+    return `${m.label} (${m.unit}${sense})${scale}`;
+  }
+
   function draw() {
     if (!points.length) return;
     const { width, height } = setCanvasSize();
@@ -163,8 +175,13 @@
     const yExtent = yMode === "log"
       ? logExtent(Math.min(...yValues), Math.max(...yValues))
       : niceLinearExtent(Math.min(...yValues), Math.max(...yValues));
-    const px = (value) => margin.left + ((transform(value, xMode) - xExtent[0]) / (xExtent[1] - xExtent[0])) * plotWidth;
-    const py = (value) => margin.top + plotHeight - ((transform(value, yMode) - yExtent[0]) / (yExtent[1] - yExtent[0])) * plotHeight;
+    // Normalised position along an axis, already flipped for lower-is-better metrics.
+    const along = (value, mode, extent, key) => {
+      const t = (transform(value, mode) - extent[0]) / (extent[1] - extent[0]);
+      return metrics[key].betterWhenLarger ? t : 1 - t;
+    };
+    const px = (value) => margin.left + along(value, xMode, xExtent, xKey) * plotWidth;
+    const py = (value) => margin.top + plotHeight - along(value, yMode, yExtent, yKey) * plotHeight;
     const xTicks = xMode === "log" ? logTicks(...xExtent) : linearTicks(...xExtent);
     const yTicks = yMode === "log" ? logTicks(...yExtent) : linearTicks(...yExtent);
 
@@ -205,11 +222,11 @@
     context.font = `600 ${mobile ? 11 : 12}px ${css("--font-sans")}`;
     context.textAlign = "center";
     context.textBaseline = "bottom";
-    context.fillText(`${metrics[xKey].label} (${metrics[xKey].unit})${xMode === "log" ? " · log" : ""}`, margin.left + plotWidth / 2, height - 5);
+    context.fillText(`${axisTitle(xKey, xMode)} →`, margin.left + plotWidth / 2, height - 5);
     context.save();
     context.translate(15, margin.top + plotHeight / 2);
     context.rotate(-Math.PI / 2);
-    context.fillText(`${metrics[yKey].label} (${metrics[yKey].unit})${yMode === "log" ? " · log" : ""}`, 0, 0);
+    context.fillText(`${axisTitle(yKey, yMode)} →`, 0, 0);
     context.restore();
     context.restore();
 

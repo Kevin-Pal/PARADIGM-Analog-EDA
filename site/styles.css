@@ -423,3 +423,10 @@ pre code { display: block; padding: 27px; color: inherit; font-family: var(--fon
   .footer-grid > div:first-child { grid-column: auto; }
   .footer-grid > div:last-child { grid-column: auto; }
 }
+
+/* "How much search bought this" -- context for the per-topology sample counts. */
+.budget-note { margin-top: 26px; padding: 20px 22px; border: 1px solid var(--line); border-left: 3px solid var(--accent); background: var(--surface); border-radius: 3px; }
+.budget-note h3 { margin: 0 0 10px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.budget-note p { margin: 0 0 10px; max-width: 74ch; font-size: 0.9rem; line-height: 1.65; }
+.budget-note p:last-child { margin-bottom: 0; }
+@media (max-width: 760px) { .budget-note { padding: 16px 17px; } }

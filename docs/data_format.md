@@ -84,6 +84,52 @@ longer sit on the front. The paper trains P2C Net on all 378 SMC samples, not ju
 Per-topology Pareto counts match the paper (§IV-C) exactly; the total of 634 is the row count
 of `result_all.csv`.
 
+## Orienting the axes so that bigger means better
+
+Two of the three headline metrics improve as they grow (DC gain, gain-bandwidth product) and
+one improves as it shrinks (power dissipation). Any plot that mixes them has to reconcile that,
+or the shape of a trade-off is unreadable.
+
+The paper's figures do it by transforming the values, in
+`notebooks/04_plot_pareto_fronts.ipynb`:
+
+```python
+x = 20 * np.log10(GBW)   # GBW on a dB scale
+y = Gain                 # already in dB
+z = 0.1 - Pdiss          # Pdiss in W, offset so that larger is better
+```
+
+The project page does the same thing a different way: it keeps power in real milliwatts and
+**reverses that axis instead**, so hovering a point still reports the true dissipation while
+"further along the axis" continues to mean "better design". The two conventions are
+equivalent for reading a trade-off; the second just survives interactive inspection better.
+
+This matters when choosing which pair of metrics to plot. Across the 634 Pareto-optimal
+samples, gain and gain-bandwidth product are essentially uncorrelated (Spearman +0.08) — they
+do not trade off against each other. Gain-bandwidth product and power do (Spearman +0.69
+pooled, and +0.84 to +0.99 within every one of the seven topologies), so once power is
+oriented "bigger is better" the pair forms a genuine descending frontier.
+
+## What it cost to build this database
+
+Every topology received the **same fixed search budget**, so the per-topology counts above
+compare topologies, not effort:
+
+| Stage | Six topologies | SMC (the paper's worked example) |
+|---|---|---|
+| Depth-first (TuRBO) | 4 weight vectors × 50 iterations × batch 10 ≈ 2,000 simulations | 4 × 100 iterations ≈ 4,000 |
+| Breadth-first (NSGA-II) | 10 generations × population 50 = 500 | 20 generations = 1,000, plus 100 further generations = 5,000 |
+| **Per topology** | **≈ 2,500 simulations, 40–80 min** | **≈ 10,000 simulations** |
+
+That is roughly **25,000 simulations and about ten hours** in total, on a single Intel
+i7-12700 desktop at about one second per simulation.
+
+Equal budgets do not produce equal yields. NGCC contributed 434 designs and DFCFC1 only 55,
+because a sample is stored only if it clears the validity screen (phase margin, gain margin,
+slew rate) *and* is not already dominated by something in the database. The counts therefore
+say how readily a topology gives up valid, non-dominated designs under a fixed search — not
+how hard anyone looked at it.
+
 ## Trained P2C Net weights
 
 `circuit_database/SMC/P2C_model/` holds 15 checkpoints (`*.pt`) with matching per-epoch loss
