@@ -1,0 +1,26 @@
+simulator lang=spectre
+global 0
+; NOTE: replace with your own PDK model file. Original: CSMC 0.18um, sm1816m50v13_usage.scs, section=tt_lib
+include "/path/to/your/pdk/model.scs" section=tt_lib
+
+subckt SMC VINN VINP VOUT IBIAS VDD VSS
+NM4 (VOUT IBIAS VSS VSS) mn18 w=1.359e-05 l=1.848e-06 m=1 //// Load transistor, 2nd stage
+NM0 (net27 VINN net26 VSS) mn18 w=1.998e-05 l=1.59e-06 m=46 //// Input transistor, 1st stage ``NM1``
+NM3 (IBIAS IBIAS VSS VSS) mn18 w=1e-06 l=1e-06 //// Bias transistor, ``not``
+NM2 (net26 IBIAS VSS VSS) mn18 w=1.918e-05 l=6.434e-07 m=24 //// Current transistor, 1st stage
+NM1 (net28 VINP net26 VSS) mn18 w=1.998e-05 l=1.59e-06 m=46 //// Input transistor, 1st stage ``NM0``
+PM2 (VOUT net28 VDD VDD) mp18 w=1.995e-05 l=5.157e-07 m=47 //// Input transistor, 2nd stage
+PM1 (net27 net27 VDD VDD) mp18 w=1.91e-05 l=1.764e-06 m=5 //// Load transistor, 1st stage ``PM0``
+PM0 (net28 net27 VDD VDD) mp18 w=1.91e-05 l=1.764e-06 m=5 //// Load transistor, 1st stage ``PM1``
+C0 (net28 VOUT) capacitor c=5.554e-13 m=1 //// Miller cap
+ends SMC
+
+
+            V0 (VSS 0) vsource dc=0 type=dc
+            V1 (VDD 0) vsource dc=1.8 type=dc
+            C0 (VOUT VSS) capacitor c=1e-11
+            I0 (VDD IBIAS) isource dc=3e-06 type=dc
+            V2 (VINP 0) vsource dc=0.9 type=dc
+            IPRB0 (VINN VOUT) iprobe
+            I1 (VINN VINP VOUT IBIAS VDD VSS) SMC
+            

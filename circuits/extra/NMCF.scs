@@ -1,0 +1,19 @@
+subckt NMCF VINN VINP VOUT IBIAS VDD VSS
+NM9 (net041 net035 VSS VSS) mn18 w=1u l=180n ////**Load** transistor, 2nd stage.
+NM7 (IBIASP IBIAS VSS VSS) mn18 w=1u l=180n ////bias transistor. should not be changed
+NM6 (IBIAS IBIAS VSS VSS) mn18 w=1u l=180n  ////bias transistor. should not be changed
+NM4 (VOUT net041 VSS VSS) mn18 w=1u l=180n ////**Input** transistor, Load(gm3) stage.
+NM0 (net27 VINN net26 VSS) mn18 w=1u l=180n ////**Input** transistor, 1st stage. ``NM1``
+NM8 (net035 net035 VSS VSS) mn18 w=1u l=180n ////**Load** transistor, 2nd stage.
+NM2 (net26 IBIAS VSS VSS) mn18 w=1u l=180n ////current tail transistor, 1st stage
+NM1 (net28 VINP net26 VSS) mn18 w=1u l=180n ////**Input** transistor, 1st stage. ``NM0``
+PM9 (VOUT net28 VDD VDD) mp18 w=1u l=180n ////the **Input** transistor, gmf2 stage.
+PM8 (net035 net28 VDD VDD) mp18 w=1u l=180n ////**Input** transistor, 2nd stage.
+PM7 (net041 IBIASP VDD VDD) mp18 w=1u l=180n ////**Load** transistor, 2nd stage.
+PM6 (IBIASP IBIASP VDD VDD) mp18 w=1u l=180n ////bias transistor. should not be changed
+PM2 (VOUT IBIASP VDD VDD) mp18 w=1u l=180n ////**Load** transistor, Load(gm3) stage.
+PM1 (net27 net27 VDD VDD) mp18 w=1u l=180n ////**Load** transistor, 1st(gm1) stage. ``PM0``
+PM0 (net28 net27 VDD VDD) mp18 w=1u l=180n ////**Load** transistor, 1st(gm1) stage. ``PM1``
+C1 (net041 VOUT) capacitor c=1p ////miller cap 2
+C0 (net28 VOUT) capacitor c=1p ////miller cap 1
+ends NMCF

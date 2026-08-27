@@ -1,0 +1,43 @@
+simulator lang=spectre
+global 0
+; NOTE: replace with your own PDK model file. Original: CSMC 0.18um, sm1816m50v13_usage.scs, section=tt_lib
+include "/path/to/your/pdk/model.scs" section=tt_lib
+
+subckt IAC VINN VINP VOUT IBIAS VDD VSS
+C1 (net045 VSS) capacitor c=2.552e-12 m=1 //// *C_a*
+C0 (net035 VOUT) capacitor c=6.832e-13 m=1 //// Miller cap
+
+NM15 (net51 IBIAS2 VSS VSS) mn18 w=1.964e-05 l=8.377e-07 m=47 //// *Load* *gm2*
+NM14 (net021 IBIAS net51 VSS) mn18 w=2.03e-06 l=1.574e-06 m=1 //// *Load* *gm2*
+NM12 (net012 IBIAS2 VSS VSS) mn18 w=5.132e-07 l=1.474e-06 m=1 //// *Current tail* *gm1*
+NM11 (net035 VINP net012 VSS) mn18 w=1.952e-05 l=6.668e-07 m=13 //// *Input* *gm1* ``NM10``
+NM10 (net013 VINN net012 VSS) mn18 w=1.952e-05 l=6.668e-07 m=13 //// *Input* *gm1* ``NM11``
+NM8 (VOUT net55 VSS VSS) mn18 w=1.918e-05 l=1.123e-06 m=22 //// *Input* *gm3*
+NM7 (net51 net021 VSS VSS) mn18 w=1.791e-05 l=1.941e-06 m=8 //// *Load* *gm2* ``NM4``
+NM4 (net55 net021 VSS VSS) mn18 w=1.791e-05 l=1.941e-06 m=8 //// *Load* *gm2* ``NM7``
+R2 (net55 net045) resistor r=9514.0 l=1.229e-06 m=1 ////*R_A*
+PM9 (net013 net013 VDD VDD) mp18 w=1.993e-05 l=1.304e-06 m=25 //// *Load* *gm1* ``PM8``
+PM8 (net035 net013 VDD VDD) mp18 w=1.993e-05 l=1.304e-06 m=25 //// *Load* *gm1* ``PM9``
+PM7 (VOUT net035 VDD VDD) mp18 w=1.932e-05 l=1.86e-06 m=22 //// *Load* *gm3* *Input* *gmf*
+PM06 (net021 net035 VDD VDD) mp18 w=1.94e-05 l=8.315e-07 m=25 //// *Input* *gm2*
+PM5 (net055 IBIASP1 VDD VDD) mp18 w=9.038e-06 l=1.876e-06 m=1 //// *Load* *gm2*  ``PM12``
+PM12 (net55 IBIASP2 net055 VDD) mp18 w=9.038e-06 l=1.876e-06 m=1 //// *Load* *gm2* ``PM5``
+PM11 (net67 IBIASP1 VDD VDD) mp18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+PM10 (IBIASP1 IBIASP2 net67 VDD) mp18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+NM22 (IBIASP2 IBIAS net68 VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+NM5 (IBIAS2 IBIAS net69 VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+NM23 (net68 IBIAS2 VSS VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+NM6 (net69 IBIAS2 VSS VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+R0 (IBIAS IBIAS2) resistor r=666666.6666666667////Bias Resistor, should not change
+R1 (IBIASP1 IBIASP2) resistor r=666666.6666666667////Bias Resistor, should not change
+ends IAC
+
+
+
+            V0 (VSS 0) vsource dc=0 type=dc
+            V1 (VDD 0) vsource dc=1.8 type=dc
+            C0 (VOUT VSS) capacitor c=5e-10
+            I0 (VDD IBIAS) isource dc=3e-07 type=dc
+            I1 (VOUT VINP VOUT IBIAS VDD VSS) IAC
+            V2 (VINP 0) vsource type=pulse val0=1.2 val1=0.6 period=2.5e-05 rise=1p fall=1p
+        

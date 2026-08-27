@@ -1,0 +1,14 @@
+# PARADIGM dependencies -- verified on Python 3.10.21, 2026-08-27
+# The +cpu suffix on torch needs PyTorch's own index:
+#   pip install torch==2.13.0+cpu --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
+# For GPU, drop the +cpu suffix and follow https://pytorch.org for your CUDA version.
+numpy==2.2.6
+pandas==2.3.3
+scikit-learn==1.7.2
+xgboost==3.2.0
+matplotlib==3.10.9
+seaborn==0.13.2
+torch==2.13.0+cpu
+gpytorch==1.15.2
+pymoo==0.6.2

@@ -1,0 +1,12 @@
+subckt SMCNR VINN VINP VOUT IBIAS VDD VSS
+NM4 (VOUT IBIAS VSS VSS) mn18 w=(1u) l=180n //// Load transistor, 2nd stage
+NM0 (net27 VINN net26 VSS) mn18 w=(1u) l=180n //// Input transistor, 1st stage
+NM3 (IBIAS IBIAS VSS VSS) mn18 w=(1u) l=180n //// Bias transistor
+NM2 (net26 IBIAS VSS VSS) mn18 w=(1u) l=180n //// Current transistor, 1st stage
+NM1 (net28 VINP net26 VSS) mn18 w=(1u) l=180n //// Input transistor, 1st stage
+PM2 (VOUT net28 VDD VDD) mp18 w=(1u) l=180n //// Input transistor, 2nd stage
+PM1 (net27 net27 VDD VDD) mp18 w=(1u) l=180n //// Load transistor, 1st stage
+PM0 (net28 net27 VDD VDD) mp18 w=(1u) l=180n //// Load transistor, 1st stage
+C0 (net28 net29) capacitor c=1p //// Miller cap
+R0 (net29 VOUT) resistor r=1k //// Nulling resistor
+ends SMCNR

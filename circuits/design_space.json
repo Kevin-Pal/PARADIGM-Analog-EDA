@@ -1,0 +1,12 @@
+{
+    "lmin" : 500e-9,
+    "lmax" : 2e-6,
+    "wmin" : 200e-9,
+    "wmax" : 1000e-6,
+
+    "VDD" : 1.8,
+
+    "step_sub" : 1e-9,
+    "wsub" : 2e-5,
+    "avoid" : {}
+}

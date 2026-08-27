@@ -1,0 +1,8 @@
+
+        alias measurement trans {
+            run tran (start=1e-05, stop=5e-05)
+            export real SR_P=1u*slewrate(V(VOUT), 0.675, 1.125)
+            export real SR_N=1u*slewrate(V(VOUT), 1.125, 0.675, theta1=90,theta2=10)
+        }
+        run trans
+    

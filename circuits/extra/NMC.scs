@@ -1,0 +1,18 @@
+subckt NMC VINN VINP VOUT IBIAS VDD VSS
+NM7 (IBIASP IBIAS VSS VSS) mn18 w=(1u) l=180n //// Bias transistor
+NM6 (net021 net028 VSS VSS) mn18 w=(1u) l=180n //// **load** transistor, 2nd stage
+NM5 (VOUT net021 VSS VSS) mn18 w=(1u) l=180n //// **Input** transistor, 3rd (load) stage
+NM4 (net028 net028 VSS VSS) mn18 w=(1u) l=180n //// **load** transistor, 2nd stage
+NM0 (net27 VINN net26 VSS) mn18 w=(1u) l=180n //// **Input** transistor, 1st stage ``NM1``
+NM3 (IBIAS IBIAS VSS VSS) mn18 w=(1u) l=180n //// Bias transistor
+NM2 (net26 IBIAS VSS VSS) mn18 w=(1u) l=180n //// Current tail transistor, 1st stage
+NM1 (net28 VINP net26 VSS) mn18 w=(1u) l=180n //// **Input** transistor, 1st stage ``NM0``
+PM5 (IBIASP IBIASP VDD VDD) mp18 w=(1u) l=180n //// Bias transistor
+PM4 (net021 IBIASP VDD VDD) mp18 w=(1u) l=180n //// **load** transistor, 2nd stage
+PM3 (VOUT IBIASP VDD VDD) mp18 w=(1u) l=180n //// **load** transistor, 3rd (load) stage
+PM2 (net028 net28 VDD VDD) mp18 w=(1u) l=180n //// **Input** transistor, 2nd stage
+PM1 (net27 net27 VDD VDD) mp18 w=(1u) l=180n //// **load** transistor, 1st stage ``PM0``
+PM0 (net28 net27 VDD VDD) mp18 w=(1u) l=180n //// **load** transistor, 1st stage ``PM1``
+C1 (net021 VOUT) capacitor c=1p //// Miller cap 1
+C0 (net28 VOUT) capacitor c=1p //// Miller cap 2
+ends NMC

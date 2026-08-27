@@ -1,0 +1,15 @@
+subckt MNMC VINN VINP VOUT IBIAS VDD VSS
+NM5 (net020 IBIAS VSS VSS) mn18 w=(1u) l=180n////the current tail transistor of the gmf1
+NM4 (VOUT IBIAS VSS VSS) mn18 w=(1u) l=180n//// Input transistor, Load(2nd) stage
+NM0 (net27 VINN net26 VSS) mn18 w=(1u) l=180n//// Input transistor, 1st stage ``NM1``
+NM3 (IBIAS IBIAS VSS VSS) mn18 w=(1u) l=180n//// Bias transistor
+NM2 (net26 IBIAS VSS VSS) mn18 w=(1u) l=180n//// Current tail transistor, 1st stage
+NM1 (net28 VINP net26 VSS) mn18 w=(1u) l=180n//// Input transistor, 1st stage ``NM0``
+PM5 (VOUT net020 VDD VDD) mp18 w=(1u) l=180n////Load transistor, gmf1 stage
+PM4 (net020 net020 VDD VDD) mp18 w=(1u) l=180n////Load transistor, gmf1 stage
+PM3 (net020 net27 VDD VDD) mp18 w=(1u) l=180n////Load transistor, gmf1 stage
+PM2 (VOUT net28 VDD VDD) mp18 w=(1u) l=180n//// Load transistor, Load(2nd) stage
+PM1 (net27 net27 VDD VDD) mp18 w=(1u) l=180n//// Load transistor, 1st stage ``PM0``
+PM0 (net28 net27 VDD VDD) mp18 w=(1u) l=180n //// Load transistor, 1st stage ``PM1``
+C0 (net28 VOUT) capacitor c=1p//// Miller cap
+ends MNMC

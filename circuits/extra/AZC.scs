@@ -1,0 +1,33 @@
+subckt AZC VINN VINP VOUT IBIAS VDD VSS
+    C5 (net125 VSS) capacitor c=1p //// *C_z*
+    C0 (net135 VOUT) capacitor c=1p //// Miller cap
+    NM17 (VOUT net053 VSS VSS) mn18 w=(1.5u) l=600n  //// *Input* *gm3*
+    NM16 (net053 net031 VSS VSS) mn18 w=(1.5u) l=600n //// *Load* *gm2* *Input* *gm2b*
+    NM15 (net055 net134 VSS VSS) mn18 w=(1u) l=350n ////*Input* *gma* ``NM14``
+    NM14 (net057 net135 VSS VSS) mn18 w=(1u) l=350n ////*Input* *gma* ``NM15``
+    NM3 (net052 net057 net135 VSS) mn18 w=(1u) l=350n  //// *Load* *gm1* ``NM2``
+    NM2 (net050 net055 net134 VSS) mn18 w=(1u) l=350n  //// *Load* *gm1* ``NM3``
+    NM22 (IBIASP2 IBIAS net140 VSS) mn18 w=(1u) l=1u ////Bias Transistor, should not change
+    NM5 (IBIAS2 IBIAS net141 VSS) mn18 w=(1u) l=1u ////Bias Transistor, should not change
+    NM7 (net031 net125 VSS VSS) mn18 w=(1.5u) l=600n //// *Load* *gm2* *Input* *gm2a*
+    NM1 (net134 IBIAS2 VSS VSS) mn18 w=(4u) l=2u  //// *Load* *gm1* ``NM0``
+    NM23 (net140 IBIAS2 VSS VSS) mn18 w=(1u) l=1u ////Bias Transistor, should not change
+    NM6 (net141 IBIAS2 VSS VSS) mn18 w=(1u) l=1u ////Bias Transistor, should not change
+    NM0 (net135 IBIAS2 VSS VSS) mn18 w=(4u) l=2u  //// *Load* *gm1* ``NM1``
+    R11 (net031 net125) resistor r=240K //// *R_z*
+    R9 (net055 net046) resistor r=85.7K //// *R_a* ``R8``
+    R8 (net057 net046) resistor r=85.7K //// *R_a* ``R9``
+    R0 (IBIAS IBIAS2) resistor r=1M ////Bias Resistor, should not change
+    R1 (IBIASP1 IBIASP2) resistor r=1M ////Bias Resistor, should not change
+    PM14 (net046 IBIASP1 VDD VDD) mp18 w=(6u) l=2u ////*Load* *gma*
+    PM7 (VOUT net052 VDD VDD) mp18 w=(3u) l=1u //// *Load* *gm3*
+    PM6 (net053 net050 VDD VDD) mp18 w=(3u) l=1u //// *Load* *gm2*
+    PM5 (net031 net052 VDD VDD) mp18 w=(3u) l=1u //// *Input* *gm2*
+    PM4 (net050 net050 VDD VDD) mp18 w=(3u) l=1u  //// *Load* *gm1* ``PM3``
+    PM3 (net052 net050 VDD VDD) mp18 w=(3u) l=1u //// *Load* *gm1* ``PM4``
+    PM2 (net118 IBIASP1 VDD VDD) mp18 w=(6u) l=2u //// *Current tail* *gm1*
+    PM11 (net139 IBIASP1 VDD VDD) mp18 w=(1u) l=1u ////Bias Transistor, should not change
+    PM1 (net135 VINP net118 VDD) mp18 w=(12u) l=1u //// *Input* *gm1* ``PM0``
+    PM0 (net134 VINN net118 VDD) mp18 w=(12u) l=2u //// *Input* *gm1* ``PM1``
+    PM10 (IBIASP1 IBIASP2 net139 VDD) mp18 w=(1u) l=1u ////Bias Transistor, should not change
+ends AZC

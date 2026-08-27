@@ -1,0 +1,49 @@
+simulator lang=spectre
+global 0
+; NOTE: replace with your own PDK model file. Original: CSMC 0.18um, sm1816m50v13_usage.scs, section=tt_lib
+include "/path/to/your/pdk/model.scs" section=tt_lib
+
+subckt AZC VINN VINP VOUT IBIAS VDD VSS
+C5 (net125 VSS) capacitor c=2.138e-12 m=1 //// *C_z*
+C0 (net135 VOUT) capacitor c=1.636e-12 m=1 //// Miller cap
+NM17 (VOUT net053 VSS VSS) mn18 w=1.985e-05 l=1.595e-06 m=47 //// *Input* *gm3*
+NM16 (net053 net031 VSS VSS) mn18 w=1.987e-05 l=7.223e-07 m=40 //// *Load* *gm2* *Input* *gm2b*
+NM15 (net055 net134 VSS VSS) mn18 w=1.938e-05 l=1.978e-06 m=15 ////*Input* *gma* ``NM14``
+NM14 (net057 net135 VSS VSS) mn18 w=1.938e-05 l=1.978e-06 m=15 ////*Input* *gma* ``NM15``
+NM3 (net052 net057 net135 VSS) mn18 w=1.949e-05 l=1.825e-06 m=19 //// *Load* *gm1* ``NM2``
+NM2 (net050 net055 net134 VSS) mn18 w=1.949e-05 l=1.825e-06 m=19 //// *Load* *gm1* ``NM3``
+NM22 (IBIASP2 IBIAS net140 VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+NM5 (IBIAS2 IBIAS net141 VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+NM7 (net031 net125 VSS VSS) mn18 w=6.318e-06 l=1.894e-06 m=1 //// *Load* *gm2* *Input* *gm2a*
+NM1 (net134 IBIAS2 VSS VSS) mn18 w=1.99e-05 l=8.01e-07 m=43 //// *Load* *gm1* ``NM0``
+NM23 (net140 IBIAS2 VSS VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+NM6 (net141 IBIAS2 VSS VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+NM0 (net135 IBIAS2 VSS VSS) mn18 w=1.99e-05 l=8.01e-07 m=43 //// *Load* *gm1* ``NM1``
+R11 (net031 net125) resistor r=6915.0 m=1 //// *R_z*
+R9 (net055 net046) resistor r=5439.0 m=1 //// *R_a* ``R8``
+R8 (net057 net046) resistor r=5439.0 m=1 //// *R_a* ``R9``
+R0 (IBIAS IBIAS2) resistor r=666666.6666666667////Bias Resistor, should not change
+R1 (IBIASP1 IBIASP2) resistor r=666666.6666666667////Bias Resistor, should not change
+PM14 (net046 IBIASP1 VDD VDD) mp18 w=1.963e-05 l=1.039e-06 m=26 ////*Load* *gma*
+PM7 (VOUT net052 VDD VDD) mp18 w=1.713e-05 l=1.307e-06 m=3 //// *Load* *gm3*
+PM6 (net053 net050 VDD VDD) mp18 w=1.955e-05 l=1.498e-06 m=38 //// *Load* *gm2*
+PM5 (net031 net052 VDD VDD) mp18 w=1.98e-05 l=8.823e-07 m=17 //// *Input* *gm2*
+PM4 (net050 net050 VDD VDD) mp18 w=1.999e-05 l=1.494e-06 m=11 //// *Load* *gm1* ``PM3``
+PM3 (net052 net050 VDD VDD) mp18 w=1.999e-05 l=1.494e-06 m=11 //// *Load* *gm1* ``PM4``
+PM2 (net118 IBIASP1 VDD VDD) mp18 w=1.924e-05 l=1.626e-06 m=9 //// *Current tail* *gm1*
+PM11 (net139 IBIASP1 VDD VDD) mp18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+PM1 (net135 VINP net118 VDD) mp18 w=1.959e-05 l=1.716e-06 m=16 //// *Input* *gm1* ``PM0``
+PM0 (net134 VINN net118 VDD) mp18 w=1.959e-05 l=1.716e-06 m=16 //// *Input* *gm1* ``PM1``
+PM10 (IBIASP1 IBIASP2 net139 VDD) mp18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+ends AZC
+
+
+
+            V0 (VSS 0) vsource dc=0 type=dc
+            V1 (VDD 0) vsource dc=1.8 type=dc
+            C0 (VOUT VSS) capacitor c=1.5e-08
+            I0 (VDD IBIAS) isource dc=3e-07 type=dc
+            V2 (VINP 0) vsource dc=0.9 type=dc
+            IPRB0 (VINN VOUT) iprobe
+            I1 (VINN VINP VOUT IBIAS VDD VSS) AZC
+            

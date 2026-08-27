@@ -1,0 +1,42 @@
+simulator lang=spectre
+global 0
+; NOTE: replace with your own PDK model file. Original: CSMC 0.18um, sm1816m50v13_usage.scs, section=tt_lib
+include "/path/to/your/pdk/model.scs" section=tt_lib
+
+subckt TCFC VINN VINP VOUT IBIAS VDD VSS
+PM11 (net047 IBIASP1 VDD VDD) mp18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+PM10 (IBIASP1 IBIASP2 net047 VDD) mp18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+PM18 (net70 net036 VDD VDD) mp18 w=1.944e-05 l=7.225e-07 m=12 //// *Load* *gm1* ``PM19``
+PM19 (net036 net036 VDD VDD) mp18 w=1.944e-05 l=7.225e-07 m=12 //// *Load* *gm1* ``PM18``
+PM13 (net47 IBIASP2 net044 VDD) mp18 w=1.891e-05 l=5.074e-07 m=17 //// *Load* *gm2*  *gmt-Input*
+PM8 (net039 net70 VDD VDD) mp18 w=1.99e-05 l=1.08e-06 m=40 //// *Input* *gm2*
+PM7 (net044 IBIASP1 VDD VDD) mp18 w=1.98e-05 l=1.173e-06 m=20 //// *Load* *gm2*
+PM2 (VOUT net70 VDD VDD) mp18 w=1.926e-05 l=6.648e-07 m=16 //// *Load* *gm3*
+NM24 (net039 IBIAS net43 VSS) mn18 w=1.913e-05 l=1.937e-06 m=5 //// *Load* *gm2*
+NM23 (net045 IBIAS2 VSS VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+NM22 (IBIASP2 IBIAS net045 VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+NM21 (net43 IBIAS2 VSS VSS) mn18 w=1.998e-05 l=7.056e-07 m=29 //// *Load* *gm2*
+NM17 (net036 VINN net035 VSS) mn18 w=1.994e-05 l=1.282e-06 m=36 //// *Input* *gm1* ``NM18``
+NM18 (net70 VINP net035 VSS) mn18 w=1.994e-05 l=1.282e-06 m=36 //// *Input* *gm1* ``NM17``
+NM19 (net035 IBIAS2 VSS VSS) mn18 w=1.17e-05 l=1.217e-06 m=2 //// *Current tail* *gm1*
+NM9 (net47 net039 VSS VSS) mn18 w=1.883e-05 l=1.63e-06 m=16 //// *Load* *gm2*
+NM6 (net049 IBIAS2 VSS VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+NM4 (VOUT net47 VSS VSS) mn18 w=1.94e-05 l=5.53e-07 m=23 //// *Input* *gm3*
+NM8 (net43 net039 VSS VSS) mn18 w=1.98e-05 l=8.991e-07 m=33 //// *Load* *gm2*
+NM5 (IBIAS2 IBIAS net049 VSS) mn18 w=2e-07 l=5e-07 ////Bias Transistor, should not change
+C3 (net044 VOUT) capacitor c=2.074e-12 m=1 ////Miller cap 2
+C0 (net70 VOUT) capacitor c=1.143e-12 m=1 ////Miller cap 1
+R1 (IBIASP1 IBIASP2) resistor r=666666.6666666667////Bias Resistor, should not change
+R0 (IBIAS IBIAS2) resistor r=666666.6666666667////Bias Resistor, should not change
+ends TCFC
+
+
+
+            V0 (VSS 0) vsource dc=0 type=dc
+            V1 (VDD 0) vsource dc=1.8 type=dc
+            C0 (VOUT VSS) capacitor c=3e-10
+            I0 (VDD IBIAS) isource dc=3e-07 type=dc
+            V2 (VINP 0) vsource dc=0.9 type=dc
+            IPRB0 (VINN VOUT) iprobe
+            I1 (VINN VINP VOUT IBIAS VDD VSS) TCFC
+            

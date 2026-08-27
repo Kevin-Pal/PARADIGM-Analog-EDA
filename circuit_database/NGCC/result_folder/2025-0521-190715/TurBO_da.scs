@@ -1,0 +1,39 @@
+simulator lang=spectre
+global 0
+; NOTE: replace with your own PDK model file. Original: CSMC 0.18um, sm1816m50v13_usage.scs, section=tt_lib
+include "/path/to/your/pdk/model.scs" section=tt_lib
+
+subckt NGCC VINN VINP VOUT IBIAS VDD VSS
+NM9 (net041 net035 VSS VSS) mn18 w=1.989e-05 l=5.494e-07 m=11 ////the **Load** transistor of the 2nd stage
+NM7 (IBIASP IBIAS VSS VSS) mn18 w=2e-07 l=5e-07 ////bias transistor. should not be changed
+NM6 (IBIAS IBIAS VSS VSS) mn18 w=2e-07 l=5e-07  ////bias transistor. should not be changed
+NM5 (net020 IBIAS VSS VSS) mn18 w=1.737e-05 l=1.643e-06 m=5 ////
+NM4 (VOUT net041 VSS VSS) mn18 w=1.94e-05 l=7.382e-07 m=15 ////**Input** transistor of the Load stage
+NM0 (net27 VINN net26 VSS) mn18 w=1.961e-05 l=9.287e-07 m=17 ////**Input** transistor of 1st(gm1) stage ``NM1``
+NM8 (net035 net035 VSS VSS) mn18 w=1.508e-05 l=1.454e-06 m=2 ////the **Load** transistor of the 2nd stage
+NM2 (net26 IBIAS VSS VSS) mn18 w=1.869e-05 l=6.373e-07 m=4 ////current tail transistor of the 1st stage
+NM1 (net28 VINP net26 VSS) mn18 w=1.961e-05 l=9.287e-07 m=17 ////**Input** transistor of 1st(gm1) stage ``NM0``
+PM9 (VOUT net28 VDD VDD) mp18 w=1.859e-05 l=1.289e-06 m=14 ////the **Input** transistor of gmf2
+PM8 (net035 net28 VDD VDD) mp18 w=1.999e-05 l=6.282e-07 m=32 ////**Input** transistor of the 2nd stage
+PM7 (net041 IBIASP VDD VDD) mp18 w=1.929e-05 l=1.732e-06 m=26 ////**Load** transistor of the 2nd stage
+PM6 (IBIASP IBIASP VDD VDD) mp18 w=2e-07 l=5e-07 ////bias transistor. should not be changed
+PM5 (VOUT net020 VDD VDD) mp18 w=1.956e-05 l=7.022e-07 m=40 ////the Input transistor of the gmf1
+PM4 (net020 net020 VDD VDD) mp18 w=1.977e-05 l=1.563e-06 m=32 ////
+PM3 (net020 net27 VDD VDD) mp18 w=1.945e-05 l=1.479e-06 m=34 ////
+PM2 (VOUT IBIASP VDD VDD) mp18 w=1.981e-05 l=1.104e-06 m=10 ////**Load** transistor of the Load stage
+PM1 (net27 net27 VDD VDD) mp18 w=1.923e-05 l=1.085e-06 m=20 ////Load transistor of the 1st stage ``PM0``
+PM0 (net28 net27 VDD VDD) mp18 w=1.923e-05 l=1.085e-06 m=20 ////**Load** transistor in the 1st stage ``PM1``
+C1 (net041 VOUT) capacitor c=5.689e-13 m=1 ////miller cap between the 2nd stage and the output
+C0 (net28 VOUT) capacitor c=2.65e-12 m=1 ////miller cap between the 1st stage and the output
+ends NGCC
+
+
+
+            V0 (VSS 0) vsource dc=0 type=dc
+            V1 (VDD 0) vsource dc=1.8 type=dc
+            C0 (VOUT VSS) capacitor c=5e-11
+            I0 (VDD IBIAS) isource dc=3e-07 type=dc
+            V2 (VINP 0) vsource dc=0.9 type=dc
+            IPRB0 (VINN VOUT) iprobe
+            I1 (VINN VINP VOUT IBIAS VDD VSS) NGCC
+            

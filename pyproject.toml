@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paradigm-analog-eda"
+version = "1.0.0"
+requires-python = ">=3.10"
+# Lower bounds only, so the package coexists with other work in the same env.
+# The exact versions this was verified against are pinned in requirements.txt.
+dependencies = [
+    "numpy>=2.2.6",
+    "pandas>=2.3.3",
+    "scikit-learn>=1.7.2",
+    "xgboost>=3.2.0",
+    "matplotlib>=3.10.9",
+    "seaborn>=0.13.2",
+    "torch>=2.0",
+    "gpytorch>=1.15.2",
+    "pymoo>=0.6.2",
+]
+
+[tool.setuptools]
+packages = ["paradigm", "paradigm.turbo"]

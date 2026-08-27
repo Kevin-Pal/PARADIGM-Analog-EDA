@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="PARADIGM is a database-guided methodology for Pareto-optimized analog circuit design, topology prediction, and simulation-efficient parameter tuning."
+    >
+    <meta name="theme-color" content="#f6f8f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#101514" media="(prefers-color-scheme: dark)">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="PARADIGM — Pareto-Optimized Analog Design">
+    <meta
+      property="og:description"
+      content="Explore 1,818 simulated analog designs and a reusable methodology for topology selection and transistor sizing."
+    >
+    <meta property="og:site_name" content="PARADIGM">
+    <title>PARADIGM — Pareto-Optimized Analog Design</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="brand" href="#top" aria-label="PARADIGM home">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span>PARADIGM</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary navigation">
+          <a href="#method">Method</a>
+          <a href="#database">Database</a>
+          <a href="#results">Results</a>
+          <a href="#start">Quickstart</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="shell hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow"><span>ISEDA 2026</span><span>Open-source reproducibility package</span></p>
+            <h1 id="hero-title">Pareto-optimized analog design, guided by a reusable database.</h1>
+            <p class="hero-deck">
+              PARADIGM maps the performance limits of classic circuit topologies once, then reuses that knowledge to select a topology and warm-start transistor sizing for every new specification.
+            </p>
+            <div class="hero-actions" aria-label="Project links">
+              <a class="button button-primary" href="https://github.com/Kevin-Pal/PARADIGM-Analog-EDA">View on GitHub <span aria-hidden="true">↗</span></a>
+              <a class="button" href="https://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&amp;queryText=PARADIGM%20Pareto-Optimized%20Analog%20Design">Paper <span aria-hidden="true">↗</span></a>
+              <a class="button button-quiet" href="#start">Quickstart <span aria-hidden="true">↓</span></a>
+            </div>
+            <p class="publication">
+              Anlan Peng · Chengjie Liu · Yuan Du · Li Du<br>
+              <span>Nanjing University · The Chinese University of Hong Kong</span>
+            </p>
+          </div>
+
+          <aside class="hero-note" aria-label="Research premise">
+            <span class="note-index">01 / RESEARCH PREMISE</span>
+            <p>Do not restart the search for every design brief.</p>
+            <p class="note-detail">Invest once in topology-level Pareto fronts. Reuse the database for topology decisions and parameter initialization.</p>
+            <div class="signal" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+          </aside>
+        </div>
+
+        <div class="shell stat-strip" aria-label="Headline results">
+          <div><strong>1,818</strong><span>simulated designs</span></div>
+          <div><strong>634</strong><span>Pareto-optimal</span></div>
+          <div><strong>7</strong><span>op-amp topologies</span></div>
+          <div><strong>94.9%</strong><span>topology accuracy</span></div>
+          <div><strong>10×</strong><span>fewer simulations</span></div>
+        </div>
+      </section>
+
+      <section class="section problem" id="problem" aria-labelledby="problem-title">
+        <div class="shell section-grid">
+          <div class="section-heading">
+            <p class="kicker">The problem</p>
+            <h2 id="problem-title">Optimization starts one decision too late.</h2>
+          </div>
+          <div class="problem-body">
+            <p class="lead">Analog IC design has two coupled choices: <em>which topology</em> can meet the brief, and <em>how to size</em> its transistors. Most automation tackles only the second.</p>
+            <div class="decision-pair">
+              <article>
+                <span class="decision-number">A</span>
+                <h3>Choose the topology</h3>
+                <p>A structural decision grounded in experience. Choose poorly, and no amount of downstream tuning makes the search efficient.</p>
+              </article>
+              <article>
+                <span class="decision-number">B</span>
+                <h3>Size the devices</h3>
+                <p>A continuous, multi-objective optimization problem. Existing black-box methods are useful here—but inherit the topology decision.</p>
+              </article>
+            </div>
+            <p class="thesis">PARADIGM makes topology selection part of the automated design loop.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section method" id="method" aria-labelledby="method-title">
+        <div class="shell">
+          <div class="section-heading heading-row">
+            <div>
+              <p class="kicker">How it works</p>
+              <h2 id="method-title">Build knowledge once. Apply it repeatedly.</h2>
+            </div>
+            <p>Two stages separate the expensive offline exploration from fast, database-guided design-time decisions.</p>
+          </div>
+
+          <figure class="diagram-card overview-figure">
+            <svg class="overview-svg" viewBox="0 0 1120 350" role="img" aria-labelledby="overview-svg-title overview-svg-desc">
+              <title id="overview-svg-title">PARADIGM two-stage workflow</title>
+              <desc id="overview-svg-desc">Stage one explores seven circuit topologies with cascaded TuRBO and NSGA-II and stores simulated designs and Pareto fronts. Stage two reuses the database for topology prediction, P2C parameter initialization, and local TuRBO refinement.</desc>
+              <defs>
+                <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L8,4 L0,8 z" class="svg-arrow"></path>
+                </marker>
+              </defs>
+              <text x="32" y="36" class="svg-overline">STAGE I · BUILD THE DATABASE</text>
+              <text x="624" y="36" class="svg-overline">STAGE II · USE THE DATABASE</text>
+              <rect x="32" y="70" width="188" height="116" rx="8" class="svg-panel"></rect>
+              <text x="54" y="104" class="svg-label">7 TOPOLOGIES</text>
+              <g class="svg-circuit" transform="translate(54 126)">
+                <path d="M0 20h22l10-16 20 32 18-32 12 16h30"></path>
+                <circle cx="0" cy="20" r="4"></circle><circle cx="112" cy="20" r="4"></circle>
+              </g>
+              <text x="54" y="166" class="svg-small">SMC · NGCC · DFCFC1 · …</text>
+              <path d="M220 128H278" class="svg-link" marker-end="url(#arrow)"></path>
+              <rect x="280" y="70" width="216" height="116" rx="8" class="svg-panel svg-panel-accent"></rect>
+              <text x="302" y="104" class="svg-label">CASCADED DSE</text>
+              <text x="302" y="136" class="svg-main">TuRBO → NSGA-II</text>
+              <text x="302" y="166" class="svg-small">converge, then broaden</text>
+              <path d="M496 128H554" class="svg-link" marker-end="url(#arrow)"></path>
+              <g transform="translate(556 64)">
+                <path d="M0 22h60v18h-60z M8 10h60v18h-60z M16-2h60v18h-60z" class="svg-database"></path>
+                <text x="38" y="72" text-anchor="middle" class="svg-small">1,818 designs</text>
+              </g>
+              <path d="M632 128H688" class="svg-link" marker-end="url(#arrow)"></path>
+              <rect x="690" y="70" width="164" height="116" rx="8" class="svg-panel"></rect>
+              <text x="712" y="104" class="svg-label">TP</text>
+              <text x="712" y="136" class="svg-main">Topology</text>
+              <text x="712" y="160" class="svg-main">prediction</text>
+              <path d="M854 128H892" class="svg-link" marker-end="url(#arrow)"></path>
+              <rect x="894" y="70" width="194" height="116" rx="8" class="svg-panel"></rect>
+              <text x="916" y="104" class="svg-label">PT</text>
+              <text x="916" y="136" class="svg-main">P2C warm start</text>
+              <text x="916" y="166" class="svg-small">+ TuRBO-1 refinement</text>
+              <path d="M32 236H1088" class="svg-rule"></path>
+              <text x="32" y="274" class="svg-label">OFFLINE · ONCE PER TOPOLOGY</text>
+              <text x="32" y="308" class="svg-note">Simulate the achievable envelope; retain every evaluated design and its Pareto status.</text>
+              <text x="624" y="274" class="svg-label">ONLINE · FOR EACH NEW BRIEF</text>
+              <text x="624" y="308" class="svg-note">Specs → topology → initial parameters → a short, local simulation loop.</text>
+            </svg>
+          </figure>
+
+          <div class="module-grid">
+            <article class="module-card">
+              <div class="module-head"><span>01</span><h3>DSE</h3><small>Design-space exploration</small></div>
+              <p>TuRBO first pushes rapidly toward the performance boundary using weighted scalar objectives. NSGA-II then expands laterally using Pareto dominance, trading a narrow fast search for broad front coverage.</p>
+              <figure class="mini-figure">
+                <svg viewBox="0 0 440 260" role="img" aria-labelledby="dse-title dse-desc">
+                  <title id="dse-title">Depth-first and breadth-first design-space exploration</title>
+                  <desc id="dse-desc">The left panel shows ray-like TuRBO searches moving rapidly toward a Pareto frontier. The right panel shows ripple-like NSGA-II generations spreading along the frontier.</desc>
+                  <text x="18" y="24" class="svg-overline">DEPTH-FIRST · TuRBO</text>
+                  <path d="M24 218V48M24 218H200" class="svg-axis"></path>
+                  <path d="M38 202C76 150 108 108 190 62" class="svg-front"></path>
+                  <path d="M47 202L126 104M73 208L145 90M100 212L165 77" class="svg-ray"></path>
+                  <g class="svg-points"><circle cx="72" cy="171" r="4"></circle><circle cx="103" cy="134" r="4"></circle><circle cx="126" cy="104" r="5"></circle><circle cx="102" cy="170" r="4"></circle><circle cx="127" cy="130" r="4"></circle><circle cx="145" cy="90" r="5"></circle><circle cx="129" cy="168" r="4"></circle><circle cx="150" cy="118" r="4"></circle><circle cx="165" cy="77" r="5"></circle></g>
+                  <text x="244" y="24" class="svg-overline">BREADTH-FIRST · NSGA-II</text>
+                  <path d="M244 218V48M244 218H420" class="svg-axis"></path>
+                  <path d="M258 202C296 150 328 108 410 62" class="svg-front"></path>
+                  <path d="M310 150c-28 4-47 20-50 43M310 150c25-3 44-17 58-39M310 150c-4-25 7-43 28-58" class="svg-ripple"></path>
+                  <path d="M310 150c-45 5-72 28-79 59M310 150c42-4 77-26 103-66" class="svg-ripple svg-ripple-faint"></path>
+                  <g class="svg-points"><circle cx="271" cy="183" r="4"></circle><circle cx="288" cy="166" r="4"></circle><circle cx="310" cy="150" r="5"></circle><circle cx="329" cy="130" r="4"></circle><circle cx="348" cy="112" r="4"></circle><circle cx="371" cy="90" r="4"></circle><circle cx="397" cy="69" r="5"></circle></g>
+                </svg>
+                <figcaption>Ray-like convergence, followed by ripple-like coverage.</figcaption>
+              </figure>
+            </article>
+
+            <article class="module-card compact-module">
+              <div class="module-head"><span>02</span><h3>TP</h3><small>Topology prediction</small></div>
+              <p>Performance targets become features and topology names become classes. Training on Pareto-optimal samples reflects a practical bias: select the topology that meets the brief without costly overdesign.</p>
+              <div class="classifier-flow" aria-label="Topology prediction flow">
+                <div><small>INPUT</small><strong>Gain · GBW · Power</strong></div>
+                <span aria-hidden="true">→</span>
+                <div><small>CLASSIFIER</small><strong>7 classes</strong></div>
+                <span aria-hidden="true">→</span>
+                <div class="accent-box"><small>OUTPUT</small><strong>Topology</strong></div>
+              </div>
+              <p class="module-result"><strong>94.9%</strong><span>best five-fold cross-validation accuracy</span></p>
+            </article>
+
+            <article class="module-card network-card">
+              <div class="module-head"><span>03</span><h3>PT</h3><small>Parameter tuning</small></div>
+              <p>P2C Net compresses database knowledge into a simulation-free initial point. TuRBO-1 then refines that prediction locally instead of spending its initialization budget rediscovering the database.</p>
+              <figure class="mini-figure network-figure">
+                <svg viewBox="0 0 560 224" role="img" aria-labelledby="p2c-title p2c-desc">
+                  <title id="p2c-title">P2C Net architecture</title>
+                  <desc id="p2c-desc">A three-dimensional performance input passes through hidden layers of 256, 512, and 256 units to produce eleven circuit parameters. Hidden layers use ReLU and dropout 0.2; the output uses sigmoid and physical scaling.</desc>
+                  <path d="M78 108H120M198 108H238M328 108H368M446 108H486" class="svg-link" marker-end="url(#arrow)"></path>
+                  <rect x="18" y="70" width="60" height="76" rx="7" class="net-input"></rect>
+                  <rect x="120" y="48" width="78" height="120" rx="7" class="net-hidden"></rect>
+                  <rect x="238" y="24" width="90" height="168" rx="7" class="net-hidden net-tall"></rect>
+                  <rect x="368" y="48" width="78" height="120" rx="7" class="net-hidden"></rect>
+                  <rect x="486" y="60" width="58" height="96" rx="7" class="net-output"></rect>
+                  <text x="48" y="102" text-anchor="middle" class="net-count">3</text><text x="48" y="125" text-anchor="middle" class="svg-small">metrics</text>
+                  <text x="159" y="102" text-anchor="middle" class="net-count">256</text><text x="159" y="125" text-anchor="middle" class="svg-small">ReLU</text>
+                  <text x="283" y="102" text-anchor="middle" class="net-count">512</text><text x="283" y="125" text-anchor="middle" class="svg-small">ReLU</text>
+                  <text x="407" y="102" text-anchor="middle" class="net-count">256</text><text x="407" y="125" text-anchor="middle" class="svg-small">ReLU</text>
+                  <text x="515" y="102" text-anchor="middle" class="net-count">11</text><text x="515" y="125" text-anchor="middle" class="svg-small">params</text>
+                  <text x="283" y="214" text-anchor="middle" class="svg-note">dropout 0.2 · Sigmoid output → physical dimensions</text>
+                </svg>
+                <figcaption>Performance metrics to circuit parameters, in one forward pass.</figcaption>
+              </figure>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section database" id="database" aria-labelledby="database-title">
+        <div class="shell">
+          <div class="section-heading heading-row database-heading">
+            <div>
+              <p class="kicker">Explore the database</p>
+              <h2 id="database-title">Every simulated design, not a redrawn paper figure.</h2>
+            </div>
+            <p>Choose any two metrics, switch linear or logarithmic scales, and isolate the topology families that matter. Data are loaded directly from the repository.</p>
+          </div>
+
+          <div class="explorer" aria-describedby="chart-description">
+            <div class="explorer-toolbar">
+              <div class="axis-controls">
+                <label>
+                  <span>X axis</span>
+                  <select id="x-metric" aria-label="X axis metric">
+                    <option value="g">DC gain (dB)</option>
+                    <option value="b">GBW (MHz)</option>
+                    <option value="p" selected>Power (mW)</option>
+                  </select>
+                </label>
+                <label>
+                  <span>X scale</span>
+                  <select id="x-scale" aria-label="X axis scale">
+                    <option value="linear">Linear</option>
+                    <option value="log" selected>Logarithmic</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Y axis</span>
+                  <select id="y-metric" aria-label="Y axis metric">
+                    <option value="g">DC gain (dB)</option>
+                    <option value="b" selected>GBW (MHz)</option>
+                    <option value="p">Power (mW)</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Y scale</span>
+                  <select id="y-scale" aria-label="Y axis scale">
+                    <option value="linear">Linear</option>
+                    <option value="log" selected>Logarithmic</option>
+                  </select>
+                </label>
+              </div>
+              <label class="switch-control">
+                <input id="pareto-only" type="checkbox" checked>
+                <span class="switch" aria-hidden="true"></span>
+                <span>Only Pareto-optimal</span>
+              </label>
+            </div>
+
+            <div class="legend-wrap">
+              <span class="legend-label">Topologies</span>
+              <div id="chart-legend" class="chart-legend" aria-label="Toggle topology visibility"></div>
+            </div>
+
+            <div class="chart-wrap">
+              <canvas id="pareto-chart" role="img" aria-label="Interactive scatter plot of the analog circuit database"></canvas>
+              <div id="chart-tooltip" class="chart-tooltip" role="status" aria-live="polite" hidden></div>
+              <p id="chart-loading" class="chart-loading">Loading 1,818 simulated designs…</p>
+            </div>
+            <div class="chart-footer">
+              <p id="chart-status" aria-live="polite">Preparing the database…</p>
+              <p><span class="dot-solid" aria-hidden="true"></span> Pareto-optimal <span class="dot-faint" aria-hidden="true"></span> other evaluated design</p>
+            </div>
+            <p id="chart-description" class="sr-only">Interactive scatter plot containing 1,818 simulated designs across SMC, NGCC, DFCFC1, TCFC, IAC, NMCNR, and AZC. Of these, 634 designs are Pareto-optimal. Controls select two of DC gain, gain-bandwidth product, and power dissipation; logarithmic scales are available for values spanning multiple orders of magnitude.</p>
+          </div>
+
+          <div class="database-facts" aria-label="Database summary">
+            <div><span>Process &amp; simulator</span><strong>CSMC 0.18 µm · Cadence Spectre</strong></div>
+            <div><span>Pareto coverage</span><strong>51.9–164.3 dB · 3 µW–40 mW</strong></div>
+            <div><span>Exploration time</span><strong>Tens of minutes per topology</strong></div>
+          </div>
+
+          <div class="topology-counts" aria-label="Pareto-optimal points per topology">
+            <span>SMC <strong>169</strong></span><span>NGCC <strong>104</strong></span><span>IAC <strong>99</strong></span><span>TCFC <strong>97</strong></span><span>AZC <strong>87</strong></span><span>NMCNR <strong>61</strong></span><span>DFCFC1 <strong>17</strong></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section results" id="results" aria-labelledby="results-title">
+        <div class="shell">
+          <div class="section-heading heading-row">
+            <div>
+              <p class="kicker">Results</p>
+              <h2 id="results-title">Measured gains at both decisions.</h2>
+            </div>
+            <p>Topology classification is reliable across model families; database-informed parameter tuning reduces the expensive simulation loop by roughly an order of magnitude.</p>
+          </div>
+
+          <div class="results-grid">
+            <article class="result-card">
+              <div class="result-card-head">
+                <div><span>TABLE I</span><h3>Topology prediction</h3></div>
+                <p>Five-fold cross-validation</p>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <caption class="sr-only">Accuracy, accuracy standard deviation, and macro F1 scores for six topology classifiers</caption>
+                  <thead><tr><th scope="col">Model</th><th scope="col">Accuracy</th><th scope="col">Acc Std</th><th scope="col">F1-macro</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row">CART</th><td>0.9318</td><td>0.0972</td><td>0.9241</td></tr>
+                    <tr class="best-row"><th scope="row">Random Forest <span>best</span></th><td><strong>0.9493</strong></td><td>0.0665</td><td><strong>0.9429</strong></td></tr>
+                    <tr><th scope="row">XGBoost</th><td>0.9414</td><td>0.0741</td><td>0.9270</td></tr>
+                    <tr><th scope="row">SVM</th><td>0.9209</td><td>0.0559</td><td>0.9105</td></tr>
+                    <tr><th scope="row">kNN</th><td>0.9477</td><td>0.0593</td><td>0.9376</td></tr>
+                    <tr><th scope="row">Neural Network</th><td>0.9052</td><td>0.0524</td><td>0.8944</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="result-card tuning-card">
+              <div class="result-card-head">
+                <div><span>TABLE II</span><h3>SMC parameter tuning</h3></div>
+                <p>Target: 10 MHz · 100 dB · 0.5 mW</p>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <caption class="sr-only">P2C Net, cold-start TuRBO, and warm-start P2C Net plus TuRBO results for an SMC circuit</caption>
+                  <thead><tr><th scope="col">Metric</th><th scope="col">P2C Net</th><th scope="col">TuRBO</th><th scope="col" class="accent-column">P2C + TuRBO</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row">GBW (MHz)</th><td>11.86</td><td>10.06</td><td class="accent-column">12.53</td></tr>
+                    <tr><th scope="row">Gain (dB)</th><td>99.88</td><td>94.73</td><td class="accent-column">99.60</td></tr>
+                    <tr><th scope="row">Pdiss (mW)</th><td>0.45</td><td>0.47</td><td class="accent-column">0.43</td></tr>
+                    <tr><th scope="row">Phase margin (°)</th><td>59.16</td><td>59.54</td><td class="accent-column">60.68</td></tr>
+                    <tr class="divider-row"><th scope="row">Iterations</th><td>—</td><td>100</td><td class="accent-column"><strong>9</strong></td></tr>
+                    <tr><th scope="row">Simulations</th><td>—</td><td>1088</td><td class="accent-column"><strong>91</strong></td></tr>
+                    <tr><th scope="row">Runtime (s)</th><td>0.0004</td><td>946</td><td class="accent-column"><strong>80</strong></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="result-callout"><strong>~10×</strong><span>fewer simulations and lower runtime, with better target fulfillment.</span></p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section start" id="start" aria-labelledby="start-title">
+        <div class="shell start-grid">
+          <div class="section-heading">
+            <p class="kicker">Get started</p>
+            <h2 id="start-title">Reproduce the data-facing results without a simulator.</h2>
+            <p>The database is included. Topology prediction and Pareto-front analysis run out of the box; new-topology exploration and closed-loop sizing require Cadence Spectre and a compatible 180 nm PDK.</p>
+            <dl class="requirements">
+              <div><dt>Python</dt><dd>≥ 3.10</dd></div>
+              <div><dt>Simulator</dt><dd>Optional for database analysis</dd></div>
+              <div><dt>License</dt><dd>Apache-2.0</dd></div>
+            </dl>
+          </div>
+          <div class="code-card">
+            <div class="code-head"><span>Terminal</span><button class="copy-button" type="button" data-copy-target="quickstart-code">Copy</button></div>
+            <pre id="quickstart-code"><code>git clone https://github.com/Kevin-Pal/PARADIGM-Analog-EDA.git
+cd PARADIGM-Analog-EDA
+conda env create -f environment.yml
+conda activate paradigm
+pip install -e .
+jupyter lab notebooks/</code></pre>
+            <div class="code-links">
+              <a href="https://github.com/Kevin-Pal/PARADIGM-Analog-EDA/blob/main/docs/reproduce.md">Reproduction guide <span aria-hidden="true">↗</span></a>
+              <a href="https://github.com/Kevin-Pal/PARADIGM-Analog-EDA/blob/main/docs/data_format.md">Data format <span aria-hidden="true">↗</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section cite" id="cite" aria-labelledby="cite-title">
+        <div class="shell cite-grid">
+          <div class="section-heading">
+            <p class="kicker">Cite</p>
+            <h2 id="cite-title">PARADIGM</h2>
+            <p>Published in the 2026 International Symposium of Electronics Design Automation, pages 229–235.</p>
+            <a class="text-link" href="https://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&amp;queryText=PARADIGM%20Pareto-Optimized%20Analog%20Design">Find the paper on IEEE Xplore <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="code-card cite-code">
+            <div class="code-head"><span>BibTeX</span><button class="copy-button" type="button" data-copy-target="bibtex-code">Copy</button></div>
+            <pre id="bibtex-code"><code>@inproceedings{peng2026paradigm,
+  title     = {{PARADIGM}: Pareto-Optimized Analog Design via
+               Intelligent Database-Guided Methodology},
+  author    = {Peng, Anlan and Liu, Chengjie and Du, Yuan and Du, Li},
+  booktitle = {2026 International Symposium of Electronics
+               Design Automation (ISEDA)},
+  pages     = {229--235},
+  year      = {2026},
+  publisher = {IEEE}
+}</code></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-grid">
+        <div>
+          <a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span><span>PARADIGM</span></a>
+          <p>Pareto-Optimized Analog Design via Intelligent Database-Guided Methodology</p>
+        </div>
+        <div><span>Authors</span><p>Anlan Peng · Chengjie Liu<br>Yuan Du · Li Du</p></div>
+        <div><span>Affiliations</span><p>Nanjing University<br>The Chinese University of Hong Kong</p></div>
+        <div><span>Project</span><p><a href="https://github.com/Kevin-Pal/PARADIGM-Analog-EDA">GitHub repository</a><br><a href="https://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&amp;queryText=PARADIGM%20Pareto-Optimized%20Analog%20Design">IEEE Xplore</a><br>Apache-2.0</p></div>
+      </div>
+      <div class="shell footer-bottom"><span>© 2026 PARADIGM authors</span><span>Research code and reproducibility materials</span></div>
+    </footer>
+  </body>
+</html>

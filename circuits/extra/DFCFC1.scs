@@ -1,0 +1,26 @@
+subckt DFCFC1 VINN VINP VOUT IBIAS VDD VSS
+    PM19 (net025 net025 VDD VDD) mp18 w=1u l=1u //// *Load* *gm1* ``PM18``
+    PM18 (net065 net025 VDD VDD) mp18 w=1u l=1u //// *Load* *gm1* ``PM19``
+    PM12 (net040 IBIASP1 VDD VDD) mp18 w=1u l=1u //// *Load* *gm4*
+    PM8 (net43 net065 VDD VDD) mp18 w=1u l=1u //// *Input* *gm2*
+    PM7 (net47 IBIASP1 VDD VDD) mp18 w=1u l=1u //// *Load* *gm2*
+    PM2 (VOUT net065 VDD VDD) mp18 w=1u l=1u //// *Load* *gmL(gm3)*
+    NM19 (net024 IBIAS VSS VSS) mn18 w=1u l=1u //// *Current Tail* *gm1*
+    NM18 (net065 VINP net024 VSS) mn18 w=1u l=1u //// *Input* *gm1* ``NM17``
+    NM17 (net025 VINN net024 VSS) mn18 w=1u l=1u //// *Input* *gm1* ``NM18``
+    NM15 (net040 net47 VSS VSS) mn18 w=1u l=1u //// *Input* *gm4* (no gmL)
+    NM9 (net47 net43 VSS VSS) mn18 w=1u l=1u //// *Load* *gm2*
+    NM4 (VOUT net47 VSS VSS) mn18 w=1u l=1u //// *Input* *gmL(gm3)*
+    NM8 (net43 net43 VSS VSS) mn18 w=1u l=1u //// *Load* *gm2*
+    C2 (net47 net040) capacitor c=2p //// Miller cap 2
+    C0 (net065 VOUT) capacitor c=2p  //// Miller cap 1
+
+    PM11 (net047 IBIASP1 VDD VDD) mp18 w=(1u) l=1u ////Bias Transistor, should not change
+    PM10 (IBIASP1 IBIASP2 net047 VDD) mp18 w=(1u) l=1u ////Bias Transistor, should not change
+    NM23 (net045 IBIAS2 VSS VSS) mn18 w=(1u) l=1u ////Bias Transistor, should not change
+    NM22 (IBIASP2 IBIAS net045 VSS) mn18 w=(1u) l=1u ////Bias Transistor, should not change
+    NM6 (net049 IBIAS2 VSS VSS) mn18 w=(1u) l=1u ////Bias Transistor, should not change
+    NM5 (IBIAS2 IBIAS net049 VSS) mn18 w=(1u) l=1u ////Bias Transistor, should not change
+    R1 (IBIASP1 IBIASP2) resistor r=100K ////Bias Resistor, should not change
+    R0 (IBIAS IBIAS2) resistor r=100K ////Bias Resistor, should not change
+ends DFCFC1

@@ -1,0 +1,20 @@
+subckt DFCFC2 VINN VINP VOUT IBIAS1 IBIAS2 VDD VSS
+PM20 (IBIASP1 IBIASP1 VDD VDD) mp18 w=1u l=1u //// Bias transistor, should not change
+PM19 (net025 net025 VDD VDD) mp18 w=1u l=1u //// Load transistor, gm1 stage ``PM18``
+PM18 (net065 net025 VDD VDD) mp18 w=1u l=1u //// Load transistor, gm1 stage ``PM19``
+PM12 (net040 IBIASP1 VDD VDD) mp18 w=1u l=1u //// Load transistor, gm4 stage
+PM8 (net43 net065 VDD VDD) mp18 w=1u l=1u //// Input transistor, gm2 stage
+PM7 (net47 IBIASP1 VDD VDD) mp18 w=1u l=1u //// Load transistor, gm2 stage
+PM2 (VOUT net065 VDD VDD) mp18 w=1u l=1u //// Load transistor, gmL(gm3) stage
+NM21 (IBIASP1 IBIAS1 VSS VSS) mn18 w=(1u) l=1u //// Bias transistor, should not change
+NM20 (IBIAS1 IBIAS1 VSS VSS) mn18 w=(1u) l=1u //// Bias transistor, should not change
+NM19 (net024 IBIAS1 VSS VSS) mn18 w=1u l=1u //// Current tail transistor, gm1 stage
+NM18 (net065 VINP net024 VSS) mn18 w=1u l=1u //// Input transistor, gm1 stage ``NM17``
+NM17 (net025 VINN net024 VSS) mn18 w=1u l=1u //// Input transistor, gm1 stage ``NM18``
+NM15 (net040 net065 VSS VSS) mn18 w=1u l=1u //// Input transistor, gm4 stage
+NM9 (net47 net43 VSS VSS) mn18 w=1u l=1u //// Load transistor, gm2 stage
+NM4 (VOUT net47 VSS VSS) mn18 w=1u l=1u //// Input transistor, gmL(gm3) stage
+NM8 (net43 net43 VSS VSS) mn18 w=1u l=1u //// Load transistor, gm2 stage
+C2 (net065 net040) capacitor c=2p //// Miller cap 2
+C0 (net065 VOUT) capacitor c=2p  //// Miller cap 1
+ends DFCFC2

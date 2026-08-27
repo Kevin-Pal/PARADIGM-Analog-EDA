@@ -1,0 +1,35 @@
+simulator lang=spectre
+global 0
+; NOTE: replace with your own PDK model file. Original: CSMC 0.18um, sm1816m50v13_usage.scs, section=tt_lib
+include "/path/to/your/pdk/model.scs" section=tt_lib
+
+subckt NMCNR VINN VINP VOUT IBIAS VDD VSS
+NM7 (IBIASP IBIAS VSS VSS) mn18 w=1.941e-05 l=1.247e-06 m=18 //// Bias transistor
+NM6 (net021 net028 VSS VSS) mn18 w=1.957e-05 l=1.189e-06 m=32 //// **Load** transistor, 2nd stage
+NM5 (VOUT net021 VSS VSS) mn18 w=1.997e-05 l=1.133e-06 m=41 //// **Input** transistor, load(3rd) stage
+NM4 (net028 net028 VSS VSS) mn18 w=1.956e-05 l=1.722e-06 m=37 //// **Load** transistor, 2nd stage
+NM0 (net27 VINN net26 VSS) mn18 w=1.966e-05 l=1.496e-06 m=30 //// **Input** transistor, 1st stage ``NM1``
+NM3 (IBIAS IBIAS VSS VSS) mn18 w=1.963e-05 l=9.411e-07 m=45 //// Bias transistor
+NM2 (net26 IBIAS VSS VSS) mn18 w=1.74e-05 l=1.312e-06 m=6 //// Current tail transistor, 1st stage
+NM1 (net28 VINP net26 VSS) mn18 w=1.966e-05 l=1.496e-06 m=30 //// **Input** transistor, 1st stage ``NM0``
+PM5 (IBIASP IBIASP VDD VDD) mp18 w=1.899e-05 l=1.473e-06 m=4 //// Bias transistor
+PM4 (net021 IBIASP VDD VDD) mp18 w=1.892e-05 l=1.557e-06 m=6 //// **Load** transistor, 2nd stage
+PM3 (VOUT IBIASP VDD VDD) mp18 w=1.994e-05 l=1.937e-06 m=37 //// **Load** transistor, load(3rd) stage
+PM2 (net028 net28 VDD VDD) mp18 w=1.999e-05 l=1.313e-06 m=24 //// **Input** transistor, 2nd stage
+PM1 (net27 net27 VDD VDD) mp18 w=1.945e-05 l=1.646e-06 m=27 //// **Load** transistor, 1st stage ``PM0``
+PM0 (net28 net27 VDD VDD) mp18 w=1.945e-05 l=1.646e-06 m=27 //// **Load** transistor, 1st stage ``PM1``
+C1 (net021 net027) capacitor c=9.685e-13 m=1 //// Miller cap 1
+C0 (net28 net027) capacitor c=1.792e-12 m=1 //// Miller cap 2
+R0 (net027 VOUT) resistor r=10650.0 m=1 //// Nulling resistor
+ends NMCNR
+
+
+
+            V0 (VSS 0) vsource dc=0 type=dc
+            V1 (VDD 0) vsource dc=1.8 type=dc
+            C0 (VOUT VSS) capacitor c=5e-11
+            I0 (VDD IBIAS) isource dc=3e-07 type=dc
+            V2 (VINP 0) vsource dc=0.9 type=dc
+            IPRB0 (VINN VOUT) iprobe
+            I1 (VINN VINP VOUT IBIAS VDD VSS) NMCNR
+            

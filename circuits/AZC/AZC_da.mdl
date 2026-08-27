@@ -1,0 +1,18 @@
+
+        alias measurement stbmeas{
+        run stb (start=0.1_Hz,stop=10GHz,probe=IPRB0)
+        
+        export real GBW_VOUT=gainBwProd(VOUT/VINN)
+        export real UGB = cross(sig = db(mag(VOUT/VINN)))
+        export real PM_VOUT=ph((VOUT/VINN)@UGB,wrap='no)/3.1415926*180
+        export real GM_VOUT=db(mag(VOUT/VINN)) @cross(sig = ph(VOUT/VINN)/3.1415926*180,dir='fall,thresh=0,n=-1)
+        export real DC_gain=db(mag(VOUT/VINN)) @0.1_Hz
+        }
+
+        alias measurement dcmeas{
+        run dc (oppoint =' logfile)
+        export real Pdiss=-I(V1:1)*1.8
+        }
+
+        run stbmeas,dcmeas
+    

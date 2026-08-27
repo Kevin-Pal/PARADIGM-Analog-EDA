@@ -1,0 +1,38 @@
+Exported variables from results directory:  ./TurBO_tran.raw/
+
+date               :  3:44:04 PM, Wed May 21, 2025
+design             :  (no title)
+simulator          :  spectre
+version            :  18.1.0.077
+
+
+Measurement Name   :  trans
+Analysis Type      :  tran
+SR_N            = 0.0162348 
+SR_P            = 0.0162547 
+
+
+Exported variables from results directory:  ./TurBO_da.raw/
+
+date               :  3:44:05 PM, Wed May 21, 2025
+design             :  (no title)
+simulator          :  spectre
+version            :  18.1.0.077
+
+
+Measurement Name   :  stbmeas
+Analysis Type      :  stb
+DC_gain         = 112.929 
+GBW_VOUT        = 65896.2 
+GM_VOUT         = -1.37701 
+PM_VOUT         = 60.3639 
+UGB             = 49198.9 
+gm2             = 4.40259e-06 
+gm3             = 2.63389e-05 
+
+
+Measurement Name   :  dcmeas
+Analysis Type      :  dc
+Pdiss           = 3.06212e-06 
+
+

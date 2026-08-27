@@ -1,0 +1,6 @@
+runs/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+**/*.raw/
+.DS_Store
