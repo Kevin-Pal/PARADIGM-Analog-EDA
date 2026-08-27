@@ -1,15 +1,19 @@
 (() => {
   "use strict";
 
-  // `betterWhenLarger: false` means the axis is drawn reversed, so that "further along
-  // the axis" always means "better design" no matter which metric is selected. Ticks keep
-  // their true values; only the direction flips. This mirrors the convention used for the
-  // figures in the paper, where every axis is oriented so that increasing means improving.
+  // Every axis is oriented so that further from the origin means a better design.
+  // Gain and GBW already work that way; power does not, so it is plotted as its
+  // reciprocal -- the same quantity the paper's fitness function uses for power
+  // (Eq. 3 takes C = 1/Pdiss). Tooltips still report the true dissipation in mW.
   const metrics = {
-    g: { label: "DC gain", unit: "dB", short: "Gain", betterWhenLarger: true },
-    b: { label: "Gain-bandwidth product", unit: "MHz", short: "GBW", betterWhenLarger: true },
-    p: { label: "Power dissipation", unit: "mW", short: "Pdiss", betterWhenLarger: false },
+    g: { label: "DC gain", unit: "dB", short: "Gain" },
+    b: { label: "Gain-bandwidth product", unit: "MHz", short: "GBW" },
+    p: { label: "Power efficiency", unit: "1/mW", short: "Pdiss",
+         plot: (v) => 1 / v },
   };
+
+  // Value as it is positioned on an axis (may differ from the value shown in the tooltip).
+  const plotted = (key, value) => (metrics[key].plot ? metrics[key].plot(value) : value);
 
   const topologyOrder = ["SMC", "NGCC", "DFCFC1", "TCFC", "IAC", "NMCNR", "AZC"];
   const colors = {
@@ -129,9 +133,7 @@
   // Axis captions carry the direction, because a reversed axis is otherwise easy to misread.
   function axisTitle(key, mode) {
     const m = metrics[key];
-    const scale = mode === "log" ? " · log" : "";
-    const sense = m.betterWhenLarger ? "" : ", lower is better";
-    return `${m.label} (${m.unit}${sense})${scale}`;
+    return `${m.label} (${m.unit})${mode === "log" ? " · log" : ""}`;
   }
 
   function draw() {
@@ -167,21 +169,17 @@
       return;
     }
 
-    const xValues = selected.map((point) => point[xKey]);
-    const yValues = selected.map((point) => point[yKey]);
+    const xValues = selected.map((point) => plotted(xKey, point[xKey]));
+    const yValues = selected.map((point) => plotted(yKey, point[yKey]));
     const xExtent = xMode === "log"
       ? logExtent(Math.min(...xValues), Math.max(...xValues))
       : niceLinearExtent(Math.min(...xValues), Math.max(...xValues));
     const yExtent = yMode === "log"
       ? logExtent(Math.min(...yValues), Math.max(...yValues))
       : niceLinearExtent(Math.min(...yValues), Math.max(...yValues));
-    // Normalised position along an axis, already flipped for lower-is-better metrics.
-    const along = (value, mode, extent, key) => {
-      const t = (transform(value, mode) - extent[0]) / (extent[1] - extent[0]);
-      return metrics[key].betterWhenLarger ? t : 1 - t;
-    };
-    const px = (value) => margin.left + along(value, xMode, xExtent, xKey) * plotWidth;
-    const py = (value) => margin.top + plotHeight - along(value, yMode, yExtent, yKey) * plotHeight;
+    // px/py take a value already in plot space (see `plotted`).
+    const px = (value) => margin.left + ((transform(value, xMode) - xExtent[0]) / (xExtent[1] - xExtent[0])) * plotWidth;
+    const py = (value) => margin.top + plotHeight - ((transform(value, yMode) - yExtent[0]) / (yExtent[1] - yExtent[0])) * plotHeight;
     const xTicks = xMode === "log" ? logTicks(...xExtent) : linearTicks(...xExtent);
     const yTicks = yMode === "log" ? logTicks(...yExtent) : linearTicks(...yExtent);
 
@@ -232,8 +230,8 @@
 
     const ordered = selected.slice().sort((a, b) => a.o - b.o);
     ordered.forEach((point) => {
-      const x = px(point[xKey]);
-      const y = py(point[yKey]);
+      const x = px(plotted(xKey, point[xKey]));
+      const y = py(plotted(yKey, point[yKey]));
       projected.push({ x, y, point });
       context.beginPath();
       context.arc(x, y, point.o === 1 ? (mobile ? 2.6 : 3.1) : 2.1, 0, Math.PI * 2);

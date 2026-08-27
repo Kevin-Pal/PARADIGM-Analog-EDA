@@ -99,10 +99,10 @@ y = Gain                 # already in dB
 z = 0.1 - Pdiss          # Pdiss in W, offset so that larger is better
 ```
 
-The project page does the same thing a different way: it keeps power in real milliwatts and
-**reverses that axis instead**, so hovering a point still reports the true dissipation while
-"further along the axis" continues to mean "better design". The two conventions are
-equivalent for reading a trade-off; the second just survives interactive inspection better.
+The project page plots power as **`1 / Pdiss`** instead -- the same quantity the paper's
+fitness function uses for power (Eq. 3 takes `C = 1/Pdiss`). A reciprocal keeps every decade
+of the four-decade power range visible on a logarithmic axis, which `0.1 - Pdiss` would
+compress away; hovering a point still reports the true dissipation in milliwatts.
 
 This matters when choosing which pair of metrics to plot. Across the 634 Pareto-optimal
 samples, gain and gain-bandwidth product are essentially uncorrelated (Spearman +0.08) — they
@@ -112,8 +112,8 @@ oriented "bigger is better" the pair forms a genuine descending frontier.
 
 ## What it cost to build this database
 
-Every topology received the **same fixed search budget**, so the per-topology counts above
-compare topologies, not effort:
+Every topology received the **same fixed search budget**, so the counts above compare
+topologies rather than effort:
 
 | Stage | Six topologies | SMC (the paper's worked example) |
 |---|---|---|
@@ -121,14 +121,14 @@ compare topologies, not effort:
 | Breadth-first (NSGA-II) | 10 generations × population 50 = 500 | 20 generations = 1,000, plus 100 further generations = 5,000 |
 | **Per topology** | **≈ 2,500 simulations, 40–80 min** | **≈ 10,000 simulations** |
 
-That is roughly **25,000 simulations and about ten hours** in total, on a single Intel
-i7-12700 desktop at about one second per simulation.
+Roughly **25,000 simulations and about ten hours** in total, on a single Intel i7-12700
+desktop at about one second per simulation.
 
-Equal budgets do not produce equal yields. NGCC contributed 434 designs and DFCFC1 only 55,
-because a sample is stored only if it clears the validity screen (phase margin, gain margin,
-slew rate) *and* is not already dominated by something in the database. The counts therefore
-say how readily a topology gives up valid, non-dominated designs under a fixed search — not
-how hard anyone looked at it.
+Equal budgets did not produce equal yields — NGCC contributed 434 designs and DFCFC1 only 55.
+A sample is stored only if it clears the validity screen (phase margin, gain margin, slew
+rate) *and* is not already dominated, but the database records only what was admitted, not
+what was attempted, so the counts on their own do not separate "harder topology" from
+"unluckier search".
 
 ## Trained P2C Net weights
 

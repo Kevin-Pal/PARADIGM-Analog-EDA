@@ -245,27 +245,6 @@
               <h2 id="database-title">Every simulated design, not a redrawn paper figure.</h2>
             </div>
             <p>Choose any two metrics, switch linear or logarithmic scales, and isolate the topology families that matter. Data are loaded directly from the repository.</p>
-          <div class="budget-note">
-            <h3>How much search bought this</h3>
-            <p>
-              Every topology was given the <strong>same fixed budget</strong>, so the counts below
-              compare topologies rather than effort. Depth-first exploration ran TuRBO over four
-              weight vectors, 50 iterations each at batch size 10 (about 2,000 simulations);
-              breadth-first expansion then ran NSGA-II for 10 generations with a population of 50
-              (500 more). SMC, the worked example in the paper, got double the depth-first budget
-              plus 120 NSGA-II generations in total, or roughly 10,000 simulations.
-              Across all seven topologies that is <strong>about 25,000 simulations and some ten
-              hours</strong> on one consumer desktop CPU — a database this useful is not expensive
-              to build, which is rather the point.
-            </p>
-            <p>
-              Equal budgets produce very unequal yields. NGCC contributed 434 designs while DFCFC1
-              contributed 55, because a sample is only stored if it clears the validity screen
-              (phase margin, gain margin, slew rate) <em>and</em> is not already dominated. The
-              per-topology counts therefore measure how readily a topology gives up valid,
-              non-dominated designs under a fixed search, not how hard anyone looked.
-            </p>
-          </div>
 
           </div>
 
@@ -277,7 +256,7 @@
                   <select id="x-metric" aria-label="X axis metric">
                     <option value="g">DC gain (dB)</option>
                     <option value="b">GBW (MHz)</option>
-                    <option value="p" selected>Power (mW)</option>
+                    <option value="p" selected>Power efficiency (1/mW)</option>
                   </select>
                 </label>
                 <label>
@@ -292,7 +271,7 @@
                   <select id="y-metric" aria-label="Y axis metric">
                     <option value="g">DC gain (dB)</option>
                     <option value="b" selected>GBW (MHz)</option>
-                    <option value="p">Power (mW)</option>
+                    <option value="p">Power efficiency (1/mW)</option>
                   </select>
                 </label>
                 <label>
@@ -326,7 +305,8 @@
             </div>
             <p id="chart-description" class="sr-only">Interactive scatter plot containing 1,818 simulated designs across SMC, NGCC, DFCFC1, TCFC, IAC, NMCNR, and AZC. Of these, 634 designs are Pareto-optimal. Controls select two of DC gain, gain-bandwidth product, and power dissipation; logarithmic scales are available for values spanning multiple orders of magnitude.</p>
             <p id="chart-keyboard-help" class="sr-only">Focus the chart and use the left and right arrow keys to inspect visible designs. Home and End jump to the first and last design; Escape clears the selection.</p>
-          </div>
+            <p class="budget-line">Every topology was given the same fixed search budget — about 2,500 simulations, or roughly 10,000 for SMC. The whole database cost some 25,000 simulations and ten hours on a single desktop CPU.</p>
+</div>
 
           <div class="database-facts" aria-label="Database summary">
             <div><span>Process &amp; simulator</span><strong>CSMC 0.18 µm · Cadence Spectre</strong></div>
