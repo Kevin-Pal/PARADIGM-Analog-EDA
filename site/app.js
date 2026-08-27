@@ -376,7 +376,7 @@
       return response.json();
     })
     .then((data) => {
-      if (!data || !Array.isArray(data.points) || data.points.length !== 1818) throw new Error("Unexpected data format");
+      if (!data || !Array.isArray(data.points) || !data.points.length) throw new Error("Unexpected data format");
       points = data.points;
       loading.hidden = true;
       draw();

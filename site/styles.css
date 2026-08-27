@@ -1,3 +1,8 @@
+/* An explicit `display` on an element defeats the browser's default
+   `[hidden] { display: none }`. `.chart-loading` sets `display: grid`, which left the
+   loading overlay sitting on top of the chart forever once it was marked hidden. */
+[hidden] { display: none !important; }
+
 :root {
   color-scheme: light dark;
   --bg: #f6f8f7;
@@ -333,6 +338,7 @@ pre code { display: block; padding: 27px; color: inherit; font-family: var(--fon
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+
 }
 
 @media (max-width: 980px) {
