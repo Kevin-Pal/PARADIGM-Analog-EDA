@@ -303,10 +303,23 @@
               <p id="chart-status" aria-live="polite">Preparing the database…</p>
               <p><span class="dot-solid" aria-hidden="true"></span> Pareto-optimal <span class="dot-faint" aria-hidden="true"></span> other evaluated design</p>
             </div>
+            <dl class="budget-rail" aria-label="Database search budget">
+              <div class="budget-item">
+                <dt>Standard search</dt>
+                <dd><strong>~2,500</strong><span>simulations / topology</span><small>SMC: ~10,000 simulations</small></dd>
+              </div>
+              <div class="budget-item">
+                <dt>Full database</dt>
+                <dd><strong>~25,000</strong><span>simulations total</span></dd>
+              </div>
+              <div class="budget-item">
+                <dt>Compute time</dt>
+                <dd><strong>~10 hours</strong><span>one desktop CPU</span></dd>
+              </div>
+            </dl>
             <p id="chart-description" class="sr-only">Interactive scatter plot containing 1,818 simulated designs across SMC, NGCC, DFCFC1, TCFC, IAC, NMCNR, and AZC. Of these, 634 designs are Pareto-optimal. Controls select two of DC gain, gain-bandwidth product, and power dissipation; logarithmic scales are available for values spanning multiple orders of magnitude.</p>
             <p id="chart-keyboard-help" class="sr-only">Focus the chart and use the left and right arrow keys to inspect visible designs. Home and End jump to the first and last design; Escape clears the selection.</p>
-            <p class="budget-line">Every topology was given the same fixed search budget — about 2,500 simulations, or roughly 10,000 for SMC. The whole database cost some 25,000 simulations and ten hours on a single desktop CPU.</p>
-</div>
+          </div>
 
           <div class="database-facts" aria-label="Database summary">
             <div><span>Process &amp; simulator</span><strong>CSMC 0.18 µm · Cadence Spectre</strong></div>
