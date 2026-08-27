@@ -23,41 +23,24 @@ from .utils import from_unit_cube, latin_hypercube, to_unit_cube
 
 
 class Turbo1_Plus:
-    """The TuRBO-1 algorithm.
+    """TuRBO-1 with warm starts, iteration limits, and objective-based early stopping.
 
     Parameters
     ----------
-    f : function handle
-    lb : Lower variable bounds, numpy.array, shape (d,).
-    ub : Upper variable bounds, numpy.array, shape (d,).
-    n_init : Number of initial points (2*dim is recommended), int. (if x_int is set, this parameter will be ignored at the first time of initialization, but will be used in the next restart)
-    max_evals : Total evaluation budget, int.
-    batch_size : Number of points in each batch, int.
-    verbose : If you want to print information about the optimization progress, bool.
-    use_ard : If you want to use ARD for the GP kernel.
-    max_cholesky_size : Largest number of training points where we use Cholesky, int
-    n_training_steps : Number of training steps for learning the GP hypers, int
-    min_cuda : We use float64 on the CPU if we have this or fewer datapoints
-    device : Device to use for GP fitting ("cpu" or "cuda")
-    dtype : Dtype to use for GP fitting ("float32" or "float64")
-    x_init : add n initial points to the optimization, numpy.array, shape (n,dim). (If None, all initial points are generated from Latin hypercube sampling according to n_init) (*NEW FEATURE*)
-    fx_init : The value of the initial point, numpy.array, shape (n,1). (If None and x_init is not None, the value of the initial point will be calculated by the function f) (*NEW FEATURE*)
-    max_iters : Maximum number of iterations for the TuRBO-m-plus algorithm, int. Only when both the present iteration number and the number of evaluations are less than max_iters and max_evals, the algorithm will continue to run. (*NEW FEATURE*)
-    f_threshold : The threshold value of the objective function. If the best value is less than the threshold, the algorithm will stop. (*NEW FEATURE*)
-
-
-    Example usage:
-        turbo1 = Turbo1(f=f, lb=lb, ub=ub, n_init=n_init, max_evals=max_evals)
-        turbo1.optimize()  # Run optimization
-        X, fX = turbo1.X, turbo1.fX  # Evaluated points
-        
-    New features:
-        - The TuRBO-m-plus algorithm can now be run in parallel with f.
-        - The TuRBO-m-plus algorithm can now be started from a given initial point.
-        - The print results are now more informative, adapting to the circuit optimization problem.
-        - The TuRBO-m-plus now has the parameter max_iters, which is inf by default.
-        - The TuRBO-m-plus now has the parameter f_threshold, which is -inf by default.
-    """
+    f : Callable accepting a 2D candidate array and returning a 2D objective array.
+    lb, ub : Lower and upper bounds with shape (d,).
+    n_init : Initial-point count; ignored for the first initialization when x_init is supplied.
+    max_evals : Total evaluation budget.
+    batch_size : Candidates evaluated per batch.
+    verbose : Whether to print optimization progress.
+    use_ard : Whether to use ARD in the GP kernel.
+    max_cholesky_size : Largest training set that uses Cholesky decomposition.
+    n_training_steps : GP hyperparameter-training steps.
+    min_cuda : CPU/GPU switching threshold.
+    device, dtype : GP fitting device and floating-point type.
+    x_init, fx_init : Optional warm-start points and values.
+    max_iters : Maximum optimization rounds.
+    f_threshold : Stop once the best objective falls below this value."""
 
     def __init__(
         self,
@@ -105,7 +88,7 @@ class Turbo1_Plus:
         self.dim = len(lb)
         self.lb = lb
         self.ub = ub
-        # new features
+        # PARADIGM extensions.
         self.max_iters = max_iters
         self.x_init = x_init
         self.fx_init = fx_init
@@ -289,7 +272,7 @@ class Turbo1_Plus:
             # Clear _X and _fX, which accumulate data for one iteration and must be cleared after a TR restart
             # In contrast, X and fX accumulate global data and do not need to be cleared
 
-            # Generate and evalute initial design points
+            # Generate and evaluate initial design points.
             # NOTE: If x_init is set, the initial points will be generated from x_init at the first time of initialization
             if self.x_init is not None and iter_num == 0:
                 if self.verbose:
@@ -309,7 +292,7 @@ class Turbo1_Plus:
                     sys.stdout.flush()
                 X_init = latin_hypercube(self.n_init, self.dim)
                 X_init = from_unit_cube(X_init, self.lb, self.ub)                
-                # NOTE: Change input to f to be a 2D array, so that it can run in parallel
+                # NOTE: Pass a 2D array to f for parallel evaluation.
                 fX_init = np.array(self.f(X_init))    
 
             # Update budget and set as initial data for this TR
@@ -338,7 +321,7 @@ class Turbo1_Plus:
                 # Standardize values
                 fX = deepcopy(self._fX).ravel()
 
-                # Create th next batch
+                # Create the next batch.
                 X_cand, y_cand, _ = self._create_candidates(
                     X, fX, length=self.length, n_training_steps=self.n_training_steps, hypers={}
                 )
@@ -348,7 +331,7 @@ class Turbo1_Plus:
                 X_next = from_unit_cube(X_next, self.lb, self.ub)
 
                 # Evaluate batch
-                # NOTE: Change input to f to be a 2D array, so that it can run in parallel
+                # NOTE: Pass a 2D array to f for parallel evaluation.
                 fX_next = np.array(self.f(X_next))
 
                 # Update trust region

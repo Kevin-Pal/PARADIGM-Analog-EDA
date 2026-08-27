@@ -4,3 +4,10 @@ __pycache__/
 .ipynb_checkpoints/
 **/*.raw/
 .DS_Store
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.superdesign/
+.agents/

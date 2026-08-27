@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 import re, json, os
 import subprocess, time
 
-# Interface
-# Use CSMC018
+# Command-line interface.
+# Use the CSMC 0.18 µm design-space bounds.
 technique_path = './circuits/design_space.json'
 
-# Read [ckt_name];[GBW];[PM];[DC_gain];[Idd] from user input
+# Read [ckt_name];[GBW];[PM];[DC_gain];[Idd] from standard input.
 input_str = input('\033[31mPlease input the performance goal: [ckt_name];[GBW];[PM];[DC_gain];[Idd];[initial_vector]\n')
 
 try:
@@ -20,10 +20,10 @@ try:
     PM = float(PM)
     DC_gain = float(DC_gain)
     Idd = float(Idd)
-    # Convert a string list to a list by stripping [] and splitting into floats
+    # Parse the bracketed, space-separated initial vector.
     initial_vector = initial_vector.strip('[]').split(' ')
     initial_vector = [float(item) for item in initial_vector]
-    # (1,dim) array
+    # Shape: (1, dim).
     initial_vector = np.array(initial_vector).reshape(1, -1)
 except:
     print('Input format error!')
@@ -31,8 +31,8 @@ except:
 
 print(f"Optimization target is set as: {ckt_name}, GBW={GBW}Hz, PM={PM}°, DC_gain={DC_gain}dB, Idd={Idd}A\033[0m")
 
-# 0820Version，support multiple scs/mdl pairs, obtain different metrics from different simulation files, and merge them into one result file—only the testbench sections may differ between pairs; the subckt sections must remain identical so variables are inserted correctly
-# Use only name as the key for subsequent simulations; do not retain source filenames
+# Update 0820: support multiple SCS/MDL pairs and merge their metrics; testbench sections may differ, but subcircuit sections must match so parameters are inserted consistently.
+# Use only the analysis name as the downstream key; do not retain source filenames.
 scs_mdl_paths = [
     {'scs': f'./circuits/{ckt_name}_da.scs', 'mdl': f'./circuits/{ckt_name}_da.mdl', 'name': 'da'},
     {'scs': f'./circuits/{ckt_name}_tran.scs', 'mdl': f'./circuits/{ckt_name}_tran.mdl', 'name': 'tran'}
@@ -44,7 +44,7 @@ result_path = './result'
 # | ----- | ------ | ----- | ---- | ----- | ----- |
 # | SMC   | 10pF   | 10MHz | 60°  | 70dB  | 150ua |
 # | NMCNR | 50pF   | 5MHz  | 60°  | 120dB | 600ua |
-# This must match the variable names used to save simulation results in the mdl files
+# These keys must match the result names written by the MDL files.
 performance_goal = {}
 performance_goal['GBW_VOUT'] = GBW
 performance_goal['PM_VOUT'] = PM
@@ -85,10 +85,11 @@ def str_to_num(origin_value:str):
 
 def variables_generation(netlist_file_path:str,
                         instance_local:list[str] = None):
-    """
-    The first argument is the path to the simulated circuit .scs file
-    The second argument contains the names of circuit elements to optimize; use None for global optimization(useless in this module)
-    """
+    """Parse optimizable variables from a Spectre netlist.
+
+    Args:
+        netlist_file_path: Path to the circuit SCS file.
+        instance_local: Device names to optimize, or None for global optimization."""
 
     full_variables = []
     # instance_local = [item.strip().replace('"','').replace("'",'') for item in instance_local]
@@ -106,42 +107,42 @@ def variables_generation(netlist_file_path:str,
             flag = 1
         if  line.startswith("ends"):
             flag = 0
-            # 0522 update: also read content outside subckt
-            # 0820 update: in the paper experiments, content outside subckt is the testbench and should not be read
+            # Update 0522: optionally read content outside the subcircuit.
+            # Update 0820: for the paper experiments, ignore testbench content outside the subcircuit.
         if  flag == 1:
             netlist_.append(line)
-    # This effectively reads only the content between subckt and ends, with comments removed
+    # Read only the uncommented content between subckt and ends.
     # print(f"the netlist is {netlist_}")
     
     for line in netlist_:
-        # Skip comments and lines starting with subckt or ends
+        # Skip comments and subckt/ends declarations.
         if  line.startswith("//") or line.startswith("subckt") or line.startswith("ends"):
             continue
         
         line = line.replace("(","").replace(")","")
-        # Strip extra leading and trailing whitespace from line
+        # Strip leading and trailing whitespace.
         line = line.strip()
 
-        if  'not' in line:#bias transistor or bias resistor should not be changed
+        if  'not' in line:# Bias transistors and bias resistors must remain unchanged.
             continue
         
         instance_name = line.split(' ')[0]
         
-        # Insert using the same comment-like method
+        # Preserve the netlist's inline-comment convention when inserting parameters.
 
         if  instance_local == None or instance_name in instance_local: 
-            # Check if the ABC mode is local mode——local optimization?
+            # Check whether ABC mode requests local optimization.
             current_instances = []
             for  variable in full_variables:
                 for instance in list(variable.keys())[0]:
-                    current_instances.append(instance) #list the instances that have been added
+                    current_instances.append(instance) # Track the instances already added.
 
-            if instance_name in current_instances: # If the instance has been added
+            if instance_name in current_instances: # If the instance is already present:
                 continue
             
             if  '`' in line:
-                # If the instance has the same parameters with other instances
-                # Use a comment-like marker to denote //// Input transistor, 1st stage ``NM0``
+                # If the instance shares parameters with other instances:
+                # Parse markers such as “//// Input transistor, 1st stage `NM0`”.
                 same_instance_flag = re.search(r"``(.*?)``",line,re.DOTALL)
                 # print(same_instance_flag)
                 if same_instance_flag:
@@ -153,13 +154,13 @@ def variables_generation(netlist_file_path:str,
                 instances = (instance_name,)
             
             # print(full_variables)
-            # an example of full_variables
+            # Example full_variables value:
             # [{('start_up_NM1',): ['w', 1e-06]}, {('start_up_NM1',): ['l', 1e-06]}, {('start_up_C0',): ['c', 1e-11]}]
             
             exist_flag = 0
-            # to deal with the situation that there are more than two instances sharing the same parameters
-            # full_variables stores the organized device parameters; each parameter is a dictionary whose key is a device name (possibly multiple devices) and whose value is the device parameter
-            # instances is a tuple of device names; multiple names indicate that the devices share the same parameters
+            # Handle cases where more than two instances share a parameter.
+            # full_variables stores organized device parameters; each dictionary maps one or more device names to a parameter.
+            # instances is a tuple of device names; multiple names share the same parameter.
             
             full_variables_copy = full_variables.copy()
             # If the loop modifies the object being iterated over, copy it first and iterate over the copy
@@ -171,12 +172,12 @@ def variables_generation(netlist_file_path:str,
                 # print(instances_exsited)
                 # print(full_variables)
                 
-                # If the current entry (instances) already exists in full_variables, add all devices in instances to the corresponding full_variables entry
+                # If instances overlaps an existing full_variables entry, merge all device names into that entry.
                 for instance_sub in instances:
                     if instance_sub in instances_exsited:
-                        # add the new instance to the existed instance
+                        # Add the new instance to the existing group.
                         # The two entries should be merged
-                        # Merge the non-overlapping device names from instances with instances_exsited
+                        # Merge non-overlapping names from instances into instances_exsited.
                         new_instances = instances_exsited.copy()
                         for instance in instances:
                             if instance not in instances_exsited:
@@ -185,7 +186,7 @@ def variables_generation(netlist_file_path:str,
                         # print(f"the instances_exsited is {instances_exsited}")
                         new_variable_key = tuple(new_instances)
                         # print(f"the new_variable_key is {new_variable_key}")
-                        # full_variables is an array whose elements are dictionaries; variable is a complete dictionary rather than a key-value pair (although it contains only one element)
+                        # full_variables is a list of one-entry dictionaries; variable refers to the whole dictionary.
                         # print(variable.values())
                         full_variables.append({new_variable_key:list(variable.values())[0]})
                         full_variables.remove(variable)
@@ -199,7 +200,7 @@ def variables_generation(netlist_file_path:str,
             # print(instances)
             items = line.split(' ')
             # print(f"the items is {items}")
-            # items contains the individual fields on one line
+            # items contains the fields parsed from one line.
 
             params = []
             for item in items:
@@ -209,18 +210,18 @@ def variables_generation(netlist_file_path:str,
                     param_value = item.split('=')[1]
                     
                     if  param_name == 'm':
-                        #do not load the information of m
+                        # Do not load multiplier m as a separate parameter.
                         continue
                     elif param_name == 'w' :
-                        #multiply the w with m
-                        # Ignore the value of m by setting it to 1, then multiply w by the old m and fold it into the total width
+                        # Fold multiplier m into width w.
+                        # Set m to 1 and fold its original value into the total width w.
                         try:
                             param_value = float(param_value)
                         except:
                             param_value = str_to_num(param_value)
                             
                         for item_w in items:
-                            #load the information of m
+                            # Load multiplier m as a separate parameter.
                             if '=' in item_w:
                                 
                                 param_name_w = item_w.split('=')[0]
@@ -234,12 +235,12 @@ def variables_generation(netlist_file_path:str,
                                             param_value_w = str_to_num(param_value_w)
                                         except:
                                             param_value_w = exec(param_value_w)
-                                            # Handle m primarily; it may sometimes be an expression
+                                            # Handle m first because it may be an expression.
                                     param_value *= param_value_w
                         params.append([param_name,param_value])
                     
                     else:
-                        # This covers l, resistors, and capacitors
+                        # This branch covers l, resistors, and capacitors.
                         try:
                             param_value = float(param_value)
                         except:
@@ -254,7 +255,7 @@ def variables_generation(netlist_file_path:str,
 
 def width_2_fw_m(w:float,
                 fw_min:float):
-    # Split an overly wide single gate into multiple gate widths and fingers
+    # Split an oversized gate into multiple fingers.
     # print(f"the w is {w} and the fw_min is {fw_min}")
     if w < fw_min:
         # print(f'the result is {w}, 1')
@@ -274,15 +275,13 @@ def write_vector2netlist(params:list[list[str],str],
                     variables:list[float],
                     fw_min:float,
                     file:str):
-    """
-    params: equal to CircuitParams.params
-    
-    variables: the vector of values for the parameters  (equal to CircuitParams.vector)
-    
-    fw_min: the minimum value of the finger width (equal to CircuitParams.wsub)
-    
-    file: the path of the netlist(.scs) file
-    """
+    """Write a parameter vector into a Spectre netlist.
+
+    Args:
+        params: Parameter descriptors from CircuitParams.params.
+        variables: Values ordered like CircuitParams.vector.
+        fw_min: Minimum finger width from CircuitParams.wsub.
+        file: Destination SCS netlist path."""
     param_dict={}
     for i,param in enumerate(params):
         inst_names = param[0]
@@ -353,10 +352,8 @@ def write_vector2netlist(params:list[list[str],str],
     return True
 
 def find_matching_scs_mdl(path)->list:
-    """
-    Find same-named scs and mdl files under the specified path (treated as pairs), and return a list of their matching names without extensions
-    """
-    # Check whether the directory exists
+    """Return the stems of same-named SCS/MDL pairs in a directory."""
+    # Verify that the directory exists.
     if not os.path.exists(path):
         print(f"The specified path {path} does not exist.")
         return {}
@@ -365,13 +362,13 @@ def find_matching_scs_mdl(path)->list:
     mdl_box = []
     pair_box = []
     
-    # Traverse the specified directory
+    # Traverse the directory.
     for filename in os.listdir(path):
-        # Get the full path of the file
+        # Resolve the full file path.
         full_path = os.path.join(path, filename)
-        # Check whether it is a file
+        # Process files only.
         if os.path.isfile(full_path):
-            # Split the filename into its base name and extension
+            # Split the filename into its stem and extension.
             base_name, extension = os.path.splitext(filename)
             if extension == '.scs':
                 scs_box.append(base_name)
@@ -382,7 +379,7 @@ def find_matching_scs_mdl(path)->list:
         else:
             pass
     
-    # Match scs and mdl files
+    # Match same-stem SCS and MDL files.
     for scs in scs_box:
         if scs in mdl_box:
             pair_box.append(scs)
@@ -391,11 +388,9 @@ def find_matching_scs_mdl(path)->list:
 
 def read_performance(run_path:str, 
                     print_flag : bool = 0)->dict[str:float]:
-    """
-    Simulate all same-named scs and mdl files (scs_mdl_pair) under the specified path, write the results to a single result file, read it, and return the performance metrics
-    """
+    """Run each SCS/MDL pair in a directory and merge its measured metrics."""
     result = {}
-    # Run the simulation
+    # Run the simulation.
     pair_box = find_matching_scs_mdl(run_path)
     
     if len(pair_box) == 0:
@@ -410,9 +405,9 @@ def read_performance(run_path:str,
         if i == 0:
             os.system(f'cd {run_path} && spectremdl -batch {pair_box[i]}.mdl -design {pair_box[i]}.scs +mt=3 >/dev/null && cat {pair_box[i]}.measure > result')
         else:
-            os.system(f'cd {run_path} && spectremdl -batch {pair_box[i]}.mdl -design {pair_box[i]}.scs +mt=3 >/dev/null && cat {pair_box[i]}.measure >> result')    # Append to the result file
+            os.system(f'cd {run_path} && spectremdl -batch {pair_box[i]}.mdl -design {pair_box[i]}.scs +mt=3 >/dev/null && cat {pair_box[i]}.measure >> result')    # Append to the result file.
     
-    # Read the result file
+    # Read the result file.
     with open(f"{run_path}/result", mode='r') as f:
         lines = f.readlines()
         for line in lines:
@@ -423,15 +418,11 @@ def read_performance(run_path:str,
 
 def read_multiple_performances(run_paths:list[str], 
                     print_flag : bool = 0)->list[dict[str:float]]:
-    """
-    Run simulations in parallel
-    
-    For each element of run_paths, simulate all same-named scs and mdl files (scs_mdl_pair) in parallel, write the results to a single result file, read it, and return the performance metrics
-    """
+    """Run read_performance for multiple directories in parallel."""
     
     count = 0
     
-    # prepare the commands to be executed in parallel
+    # Prepare commands for parallel execution.
     commands = []
     for run_path in run_paths:
         pair_box = find_matching_scs_mdl(run_path)
@@ -447,18 +438,18 @@ def read_multiple_performances(run_paths:list[str],
     if print_flag:
         print(f"Running {count} spectre simulations in parallel")
         
-    # must enable shell=True to run commands in the form of a string
+    # shell=True is required because each command is stored as a shell string.
     # subprocess.Popen("pwd", shell=True)
     # subprocess.Popen("cd ./runs && ls", shell=True)
     
-    # run the commands in parallel
+    # Run the commands in parallel.
     processes = [subprocess.Popen(command, shell=True) for command in commands]
     
-    # wait for all processes to finish and then read the results
+    # Wait for all processes to finish before reading results.
     for process in processes:
         process.wait()
         
-    # read the results
+    # Read the results.
     results = []
     for run_path in run_paths:
         pair_box = find_matching_scs_mdl(run_path)
@@ -484,13 +475,9 @@ def fitness_function_essay(
     present_performance:dict[str:float],
     performance_goal:dict[str:float],
     print_flag:bool = 0)->float:
-    """
-    Compute fitness using only GBW_VOUT, PM_VOUT, DC_gain, and `Pdiss` (dictionary keys must match the mdl variable names)
-    
-    Implement the Modified fitness function from Algorithm 1 in the paper (optimize only `Pdiss`; the other targets only need to be met)
-    
-    Higher is better
-    """
+    """Compute the modified Algorithm 1 fitness from GBW_VOUT, PM_VOUT, DC_gain, and Pdiss.
+
+    Only Pdiss is optimized; the remaining metrics are constraints. Higher values are better."""
     loss = 0
     for Ind in ['GBW_VOUT','PM_VOUT','DC_gain']:        
         Ind_ = present_performance[Ind]
@@ -528,13 +515,9 @@ def fitness_function_ABC(
     result:dict[str:float],
     op_tgt:dict[str:float],
     print_flag:bool = 0)->float:
-    """
-    Compute fitness using only GBW_VOUT, PM_VOUT, DC_gain, and `Pdiss` (dictionary keys must match the mdl variable names)
-    
-    The metrics SR_N, SR_P, GM_VOUT, and UGB are also considered, but are not optimized and require transient simulation
-    
-    Higher is better
-    """
+    """Compute fitness from GBW_VOUT, PM_VOUT, DC_gain, and Pdiss.
+
+    SR_N, SR_P, GM_VOUT, and UGB are validity checks rather than optimization objectives. Higher values are better."""
     try:
         # print(result)
         dc_gain = float(result["DC_gain"])
@@ -550,7 +533,7 @@ def fitness_function_ABC(
         SR_N = float(result["SR_N"])
         GM = float(result["GM_VOUT"])
         UGB = float(result["UGB"])
-        try:    # This parameter is unavailable for the SMC circuit
+        try:    # This metric is unavailable for the SMC circuit.
             gm2 = float(result["gm2"])
             gm3 = float(result["gm3"])
         except:
@@ -579,7 +562,7 @@ def fitness_function_ABC(
             elif PM_VOUT < PM_VOUT_require:
                 fitness += ((PM_VOUT_require - PM_VOUT) / PM_VOUT) ** 2
             else:
-                fitness += 1    # Handle NaN values
+                fitness += 1    # Handle NaN values.
             if print_flag:
                 print(f"PM_VOUT : {PM_VOUT_require} vs {PM_VOUT}")
         elif item == "GBW_VOUT":
@@ -649,27 +632,13 @@ def fitness_function_ABC(
     return fitness
     
 class CircuitParams:
-    '''
-    At initialization, read the netlist and process parameters to obtain the following information:
-    ----------------
-    
-    1.variables : a list of device names, device types, and device parameters; parameters come from the original netlist
-        e.g. [{('start_up_NM1',): ['w', 9.1e-07]}, {('start_up_NM1',): ['l', 9.6e-07]}, {('start_up_C0',): ['c', 9.216e-12]}, ...]
-        includes netlist parameter values for initializing the optimization algorithm
-        
-    2.params : a list of device names and device types without device parameters
-        e.g. [[('start_up_NM1',), 'w'], [('start_up_NM1',), 'l'], [('start_up_C0',), 'c'], ...]
-        has no netlist parameter values; used with vector as optimization input and for writing parameters to the netlist and simulator
-        
-    3.vector : the optimization input vector; a list of device parameter values that depends on whether netlist initial values are used
-        e.g. [9.1e-07, 9.6e-07, 9.216e-12, ...]
-        contains no device names or types and is used as optimization input
-        
-    4.lb, ub ,step : the search range for each parameter (upper bound, lower bound, and step), with the same structure and length as vector
-        e.g. [9e-07, 9.6e-07, 9e-12, ...]
-        contains no device names or types and is used as optimization input
-    
-    '''
+    """Parse a netlist and process bounds into optimization parameters.
+
+    Attributes:
+        variables: Device/parameter descriptors with netlist initial values.
+        params: Device/parameter descriptors without values.
+        vector: Ordered optimization values.
+        lb, ub, step: Per-parameter bounds and quantization steps."""
     
     def __init__(self, scs_path, technique_path, initial_flag:bool = False):
         self.get_technique_params(technique_path)
@@ -686,14 +655,12 @@ class CircuitParams:
         self.wmin = abc_parameter["wmin"]
         self.wmax = abc_parameter["wmax"]
         self.VDD = abc_parameter["VDD"]
-        self.step_sub = abc_parameter["step_sub"]    # transistor gate-width and gate-length precision (step size)
-        self.wsub = abc_parameter["wsub"]    # maximum gate width for a single finger
-        self.avoid = abc_parameter["avoid"]    # some process libraries report errors for unusual device sizes; 180 nm does not have this issue
+        self.step_sub = abc_parameter["step_sub"]    # Transistor width/length quantization step.
+        self.wsub = abc_parameter["wsub"]    # Maximum gate width per finger.
+        self.avoid = abc_parameter["avoid"]    # Device sizes rejected by a process library; none are needed for this 180 nm process.
     
     def get_initial_value(self, initial_flag:bool):
-        '''
-        Return the initial value of vector, depending on whether netlist initial values are used for optimization
-        '''
+        """Return the optimization vector with or without netlist initial values."""
         if initial_flag:  # (1) Optimize using netlist initial values
             initial_value = []
             for value in self.variables:
@@ -715,9 +682,7 @@ class CircuitParams:
         return initial_value
         
     def get_lb_ub_step(self, initial_flag:bool):
-        '''
-        Return per-dimension lower and upper bounds for vector (defining the parameter search space) and the step size, depending on whether netlist initial values are used
-        '''
+        """Return per-parameter lower bounds, upper bounds, and quantization steps."""
         if initial_flag:  # (1) Optimize using netlist initial values
             infimum = []
             supremum = []
@@ -733,7 +698,7 @@ class CircuitParams:
                     min_len = max(self.lmin,list(value.values())[0][1]*0.5)
                     infimum.append((min_len-min_len%self.step_sub)+self.step_sub)
                     supremum.append(min(self.lmax,list(value.values())[0][1]*1.3))
-                    step.append(self.step_sub)   # the step sizes for w and l depend on the precision supported by the process
+                    step.append(self.step_sub)   # The w/l steps follow the process quantization.
                 elif param_cur == 'm':
                     infimum.append(list(value.values())[0][1])
                     supremum.append(list(value.values())[0][1])
@@ -744,7 +709,7 @@ class CircuitParams:
                     step.append(list(value.values())[0][1]/1000)
         
         else:   # (2) Optimize without initial values
-             infimum = [] # Set the optimization search space
+             infimum = [] # Set the optimization search space.
              supremum = []
              for value in self.variables:
                 param_cur = list(value.values())[0][0]
@@ -771,21 +736,21 @@ class CircuitParams:
 class FitnessFunction:
     
     def __init__(self, scs_mdl_paths:list[dict[str,str]], run_path, ckt_name, performance_goal, params, wsub, print_flag:bool = 1):
-        self.scs_mdl_paths = scs_mdl_paths  # list of dict, key is 'scs', 'mdl' and 'name', value is the path of the file or the mdl name
+        self.scs_mdl_paths = scs_mdl_paths  # List of dictionaries with scs, mdl, and name entries.
         self.run_path = run_path
         self.ckt_name = ckt_name
-        self.performance_goal = performance_goal    # dict, key is the name of performance, value is the dict of value, type
-        self.params = params    # corresponding to CircuitParams.params
-        self.wsub = wsub    # corresponding to CircuitParams.wsub
+        self.performance_goal = performance_goal    # Maps each metric name to its value and type metadata.
+        self.params = params    # Corresponds to CircuitParams.params.
+        self.wsub = wsub    # Corresponds to CircuitParams.wsub.
         self.print_flag = print_flag
         
-        # Copy mdl_file and scs_file to the run_path/ckt_name directory
+        # Copy the MDL and SCS files into run_path/ckt_name.
         try:
             os.makedirs(os.path.join(run_path, ckt_name))
         except FileExistsError:
             pass
         
-        # Clear all old scs and mdl files before copying
+        # Remove stale SCS and MDL copies first.
         try:
             os.system(f'rm {os.path.join(run_path, ckt_name)}/*.scs')
             os.system(f'rm {os.path.join(run_path, ckt_name)}/*.mdl')
@@ -801,23 +766,21 @@ class FitnessFunction:
             os.system(f'cp {mdl_path} {f"{os.path.join(run_path, ckt_name)}/TurBO_{type_name}.mdl"}')
         
     def __call__(self, x:list[float]) -> float:
-        """
-        Lower is better，fitness below 1 means that all targets have been met
-        """
-        # write the vector to the netlist file
+        """Evaluate one candidate. Lower values are better; values below 1 meet all targets."""
+        # Write the vector to the netlist.
         mdl_run_path = os.path.join(self.run_path, self.ckt_name)
         for scs_mdl_path in self.scs_mdl_paths:
             write_vector2netlist(self.params, x, self.wsub, f"{mdl_run_path}/TurBO_{scs_mdl_path['name']}.scs")
         
-        # run the simulation and get the performance
+        # Run the simulation and read its metrics.
         present_performance = read_performance(mdl_run_path)
         
-        # calculate the fitness
+        # Calculate fitness.
         result = fitness_function_ABC(present_performance, self.performance_goal, self.print_flag)
         
-        # TuRBOM fitness is minimized, so its reciprocal is taken; a value below 1 means that all targets have been met
+        # TuRBO-M minimizes its objective; values below 1 mean that all targets have been met.
         # result = FITNESS_THRE/result  # reciprocal method, but subsequent convergence is too slow
-        result = -result    # simple and aggressive, but may not be supported (it is supported)
+        result = -result    # Use the supported direct sign inversion.
         
         return result
          
@@ -825,19 +788,19 @@ class FitnessFunction:
 class FitnessFunction_Prallel:
     
     def __init__(self, scs_mdl_paths, run_path, ckt_name, performance_goal, params, wsub, print_flag:bool = 1):
-        self.scs_mdl_paths = scs_mdl_paths  # list of dict, key is 'scs', 'mdl' and 'name', value is the path of the file or the mdl name
+        self.scs_mdl_paths = scs_mdl_paths  # List of dictionaries with scs, mdl, and name entries.
         self.run_path = run_path
         self.ckt_name = ckt_name
-        self.performance_goal = performance_goal    # dict, key is the name of performance, value is the dict of value, type and relation
-        self.params = params    # corresponding to CircuitParams.params
-        self.wsub = wsub    # corresponding to CircuitParams.wsub
+        self.performance_goal = performance_goal    # Maps each metric name to its value, type, and relation metadata.
+        self.params = params    # Corresponds to CircuitParams.params.
+        self.wsub = wsub    # Corresponds to CircuitParams.wsub.
         self.print_flag = print_flag
         
         
         try:
             os.makedirs(os.path.join(run_path, ckt_name))
         except FileExistsError:
-            # Clear all subdirectories under the original directory
+            # Clear prior per-candidate run directories.
             try:
                 os.system(f'rm -rf {os.path.join(run_path, ckt_name)}/TurBO_*')
             except:
@@ -845,15 +808,13 @@ class FitnessFunction_Prallel:
         
         
     def __call__(self, x:list[list[float]]) -> float:
-        """
-        Lower is better，fitness below 1 means that all targets have been met
-        """
-        # get the parallel number
+        """Evaluate a candidate batch. Lower values are better; values below 1 meet all targets."""
+        # Determine the degree of parallelism.
         n = len(x)
         
         mdl_run_paths = []
         
-        # copy scs and mdl files to different directories and write each vector to the netlist file
+        # Copy SCS/MDL files into per-candidate directories and write each vector.
         for i in range(n):
             mdl_run_path = os.path.join(self.run_path, self.ckt_name) + f"/TurBO_{i}"
             try:
@@ -872,20 +833,20 @@ class FitnessFunction_Prallel:
 
                 write_vector2netlist(self.params, x[i], self.wsub, f"{mdl_run_path}/TurBO_{type_name}.scs")
         
-        # run the simulations and get the performances in parallel
+        # Run simulations and collect metrics in parallel.
         present_performances = read_multiple_performances(mdl_run_paths)
         
         results = []
         
         
         for present_performance in present_performances:
-            # calculate the fitness
+            # Calculate fitness.
             result = fitness_function_ABC(present_performance, self.performance_goal, self.print_flag)
             
-            # TuRBOM fitness is minimized, so its reciprocal is taken; a value below 1 means that all targets have been met
+            # TuRBO-M minimizes its objective; values below 1 mean that all targets have been met.
             # result = FITNESS_THRE/result  # reciprocal method, but subsequent convergence is too slow
             # print(result)
-            result = -result    # simple and aggressive, but may not be supported (it is supported)
+            result = -result    # Use the supported direct sign inversion.
             
             results.append([result])
         
@@ -902,12 +863,12 @@ Chat_Turbo1_Plus = Turbo1_Plus(
     f=f_parallel,
     lb=np.array(circuit.lb),
     ub=np.array(circuit.ub),
-    n_init=2*dim,  # number of initial points for each trust region, fix the value to 10 or 2*dim
+    n_init=2*dim,  # Initial points per trust region: 10 or 2 * dim.
     max_evals=99999,
     max_iters=100,
     batch_size=10,
     f_threshold=-1e4+1,
-    x_init=initial_vector, # or circuit.vector
+    x_init=initial_vector, # Alternatively, use circuit.vector.
     device='cpu',
 )
 
@@ -923,14 +884,14 @@ f_best, x_best = fX[index_best], X[index_best]
 
 print("Best value found:\n\tf(x) = %.4g\nObserved at:\n\tx = %s" % (f_best, np.array2string(x_best, formatter={'float_kind':lambda x: "%.3g" % x})))
 
-# Save results
+# Save results.
 
 try:
     os.makedirs(result_path)
 except FileExistsError:
     pass
 
-# Clear the result directory
+# Clear the result directory.
 try:
     os.makedirs(f'{result_path}/{ckt_name}')
 except FileExistsError:
@@ -942,11 +903,11 @@ for scs_mdl_path in scs_mdl_paths:
     type_name = scs_mdl_path['name']
     os.system(f'cp {scs_path} {result_path}/{ckt_name}/TuBRO_{type_name}_result.scs')
     os.system(f'cp {mdl_path} {result_path}/{ckt_name}/TuBRO_{type_name}_result.mdl')
-    # Insert the optimum and write it to the .scs file
+    # Insert the optimum into the SCS file.
     write_vector2netlist(circuit.params, x_best, circuit.wsub, f"{result_path}/{ckt_name}/TuBRO_{type_name}_result.scs")
-    # Run the simulation
+    # Run the simulation.
     os.system(f'cd {result_path}/{ckt_name} && spectremdl -batch TuBRO_{type_name}_result.mdl -design TuBRO_{type_name}_result.scs +mt=3 >/dev/null && cat *.measure > result')
-    # Delete extraneous files under the result directory (except *.mdl, *.scs, and result)
+    # Delete generated files other than MDL, SCS, and result files.
     os.system(f'cd {result_path}/{ckt_name} && rm -rf *.log *.raw *.mt0 *.mt1 *.mt2 *.mt3 *.mt4')
 
 # # Clear run_path/ckt_name after completion to avoid consuming disk space

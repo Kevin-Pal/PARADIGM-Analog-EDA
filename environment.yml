@@ -12,5 +12,6 @@ dependencies:
   - pymoo=0.6.2
   - pip
   - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cpu
       - torch==2.13.0+cpu
       - gpytorch==1.15.2

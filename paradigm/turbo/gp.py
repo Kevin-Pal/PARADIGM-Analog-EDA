@@ -44,7 +44,7 @@ def train_gp(train_x, train_y, use_ard, num_steps, hypers={}):
     assert train_y.ndim == 1
     assert train_x.shape[0] == train_y.shape[0]
 
-    # Create hyper parameter bounds
+    # Create hyperparameter bounds.
     noise_constraint = Interval(5e-4, 0.2)
     if use_ard:
         lengthscale_constraint = Interval(0.005, 2.0)
@@ -81,7 +81,7 @@ def train_gp(train_x, train_y, use_ard, num_steps, hypers={}):
         hypers["likelihood.noise"] = 0.005
         model.initialize(**hypers)
 
-    # Use the adam optimizer
+    # Use the Adam optimizer.
     optimizer = torch.optim.Adam([{"params": model.parameters()}], lr=0.1)
 
     for _ in range(num_steps):

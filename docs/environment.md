@@ -12,7 +12,7 @@
 | Simulator | **Cadence Spectre® 18.1.0.077** |
 | Process | **CSMC 0.18 µm** (`sm1816m50v13_usage.scs`, section `tt_lib`) |
 
-## Verified environment (re-built 2026-08-27)
+## Verified environment (rebuilt 2026-08-27)
 
 ```bash
 conda env create -f environment.yml     # or: pip install -r requirements.txt

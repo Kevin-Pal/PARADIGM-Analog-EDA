@@ -37,29 +37,35 @@ Two details matter if you want to match the published numbers:
    i.i.d. — that is exactly why the reported standard deviations are as large as they are.
    Passing `StratifiedKFold(shuffle=True)` instead collapses the std to ~0.015 and no longer
    matches the paper.
-2. **`GBW` is converted to dB** (`20·log10`) before standardisation, for SVM / kNN / NN only.
+2. **`GBW` is converted to dB** (`20·log10`) before standardization, for SVM / kNN / NN only.
    The tree-based models take the raw features.
 
-Re-run on 2026-08-27 under Python 3.10.21 / scikit-learn 1.7.2 / xgboost 3.2.0:
+Re-run of this notebook on 2026-08-27 (Python 3.10.21, scikit-learn 1.7.2, xgboost 3.2.0),
+executed twice so that library drift can be told apart from run-to-run variance:
 
-| Model | Acc (paper) | Acc (re-run) | Δ | F1-macro (paper) | F1-macro (re-run) | Δ |
-|---|---:|---:|---:|---:|---:|---:|
-| CART | 0.9318 | 0.9319 | **+0.0001** | 0.9241 | 0.9263 | +0.0022 |
-| Random Forest | 0.9493 | 0.9446 | −0.0047 | 0.9429 | 0.9376 | −0.0053 |
-| XGBoost | 0.9414 | 0.9398 | −0.0016 | 0.9270 | 0.9252 | −0.0018 |
-| SVM | 0.9209 | 0.9210 | **+0.0001** | 0.9105 | 0.9106 | **+0.0001** |
-| kNN | 0.9477 | 0.9478 | **+0.0001** | 0.9376 | 0.9376 | **0.0000** |
-| Neural net | 0.9052 | 0.9067 | +0.0015 | 0.8944 | 0.8849 | −0.0095 |
+| Model | Paper | Run 1 | Run 2 | Stable across runs? |
+|---|---:|---:|---:|---|
+| Random Forest | 0.9493 | 0.9493 | 0.9493 | yes — reproduces exactly |
+| kNN | 0.9477 | 0.9478 | 0.9478 | yes |
+| SVM | 0.9209 | 0.9210 | 0.9210 | yes |
+| XGBoost | 0.9414 | 0.9366 | 0.9366 | yes, but ~0.005 below the paper |
+| CART | 0.9318 | 0.9303 | 0.9319 | **no** |
+| Neural network | 0.9052 | 0.9194 | 0.8878 | **no** |
 
-CART, SVM and kNN reproduce to within 1e-4. Random Forest and XGBoost land within 0.005 —
-tie-breaking and histogram binning changed across library versions. The MLP is the loosest,
-which is expected: its initialisation RNG and Adam implementation are version-sensitive.
-Reported standard deviations reproduce to within 0.001 for every model except the MLP.
+Three classifiers land on the published accuracies exactly. XGBoost is stable but sits about
+0.005 low; histogram binning and tie-breaking changed between library versions.
+
+**CART and the MLP are not seeded, so expect them to move between runs.** The notebook builds
+its final estimator as `Model(**grid_search.best_params_)`, and `best_params_` does not carry
+the `random_state` that was set on the search estimator — so split tie-breaking (CART) and
+weight initialisation (MLP) are left to chance. Across runs CART stays within roughly ±0.002
+of the published value and the MLP within roughly ±0.02. Pass `random_state=42` when
+constructing those two final models if you want bit-identical reruns.
 
 ## 3. Fig. 6 / Fig. 7 — design-space exploration
 
 `notebooks/04_plot_pareto_fronts.ipynb` plots the shipped CSVs directly. The "before → after"
-pairs in the paper are two adjacent snapshots of the same cumulative database:
+pair in Fig. 7 uses two adjacent snapshots of the same cumulative database:
 
 | Paper figure | Before | After |
 |---|---|---|
@@ -75,7 +81,7 @@ The equivalent SMC progression (used in the source thesis) is
 `notebooks/06_parameter_tuning.ipynb`, target `GBW = 10 MHz, Gain = 100 dB, Pdiss = 0.5 mW`
 on SMC.
 
-The L1-only training stage needs only PyTorch and reproduces the published loss curve; the
+The L1-only training stage needs only PyTorch and reproduces the reported loss curve; the
 shipped checkpoint `circuit_database/SMC/P2C_model/P2C_Net_FD_SMC_20250522-161012.pt` is the
 one behind the paper's `L1 = 0.0447`, so you can skip the 20 000-epoch run and load it directly.
 
@@ -85,7 +91,7 @@ The remaining columns need Spectre:
   a batch of 10 samples with 11 parameters costs `10 × 11 × 2 = 220` simulations
 - the TuRBO refinement calls the simulator once per candidate
 
-Published run: 9 iterations / 91 simulations / 80 s warm-started, versus
+Reported run: 9 iterations / 91 simulations / 80 s warm-started, versus
 100 iterations / 1088 simulations / 946 s from a cold start.
 
 ## 5. Building a database for a new topology *(simulator required)*

@@ -168,7 +168,7 @@ class TurboM(Turbo1):
             for i in range(self.n_trust_regions):
                 idx = np.where(self._idx == i)[0]  # Extract all "active" indices
 
-                # Get the points, values the active values
+                # Get the active trust region's points and values.
                 X = deepcopy(self.X[idx, :])
                 X = to_unit_cube(X, self.lb, self.ub)
 

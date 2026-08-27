@@ -1,8 +1,7 @@
 # PARADIGM dependencies -- verified on Python 3.10.21, 2026-08-27
-# The +cpu suffix on torch needs PyTorch's own index:
-#   pip install torch==2.13.0+cpu --index-url https://download.pytorch.org/whl/cpu
-#   pip install -r requirements.txt
-# For GPU, drop the +cpu suffix and follow https://pytorch.org for your CUDA version.
+# The extra index supplies the pinned CPU-only PyTorch wheel. For GPU builds,
+# remove the +cpu suffix and follow https://pytorch.org for your CUDA version.
+--extra-index-url https://download.pytorch.org/whl/cpu
 numpy==2.2.6
 pandas==2.3.3
 scikit-learn==1.7.2

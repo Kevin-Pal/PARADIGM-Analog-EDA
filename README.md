@@ -2,7 +2,7 @@
 
 **Pareto-Optimized Analog Design via Intelligent Database-Guided Methodology**
 
-Official implementation and reproducibility package for the ISEDA 2026 paper.
+Official implementation and reproducibility package for the forthcoming ISEDA 2026 paper.
 
 PARADIGM turns analog circuit design into a database problem. It first spends compute *once*
 per topology to map out that topology's Pareto front, then reuses the resulting database to
@@ -14,7 +14,7 @@ optimizer converges in tens of simulations instead of thousands.
 ## What is here
 
 Seven operational-amplifier topologies, explored at a 180 nm node, distilled into a
-**Pareto-front database of 1 818 simulated designs (634 of them Pareto-optimal)** — plus the
+**Pareto-front database of 1,818 simulated designs (634 of them Pareto-optimal)** — plus the
 code that built it and the two models that consume it.
 
 | Module | What it does | Paper |
@@ -25,18 +25,19 @@ code that built it and the two models that consume it.
 
 Headline results, all reproducible from this repository:
 
-- design-space exploration converges within **tens of minutes** per topology
-- topology prediction reaches **94.9 % accuracy** (random forest, 5-fold CV)
-- warm-started sizing hits the target in **9 iterations / 91 simulations / 80 s**, versus
+- Design-space exploration converges within **tens of minutes** per topology.
+- Topology prediction reaches **94.9 % accuracy** (random forest, five-fold CV).
+- Warm-started sizing hits the target in **9 iterations / 91 simulations / 80 s**, versus
   **100 / 1088 / 946 s** cold — roughly a **10×** reduction
-  (reproduced with `scripts/run_sizing_warmstart.py` and `scripts/run_sizing.py`)
+  (reproduced with `scripts/run_sizing_warmstart.py` and `scripts/run_sizing.py`).
 
 ## Quickstart
 
 ```bash
 git clone https://github.com/Kevin-Pal/PARADIGM-Analog-EDA.git
 cd PARADIGM-Analog-EDA
-conda env create -f environment.yml && conda activate paradigm
+conda env create -f environment.yml
+conda activate paradigm
 pip install -e .
 jupyter lab notebooks/
 ```
@@ -74,10 +75,11 @@ site/                      project page (GitHub Pages) with an interactive brows
                            over all 1,818 simulated designs
 scripts/                   command-line drivers and utilities
 ├── run_sizing.py            TuRBO from a cold start
-├── run_sizing_warmstart.py  TuRBO initialised from a P2C Net prediction
+├── run_sizing_warmstart.py  TuRBO initialized from a P2C Net prediction
 └── build_site_data.py       regenerates site/data/pareto.json from the database
 circuits/                  netlists + MDL testbenches for the seven topologies
 ├── <CKT>/                   <CKT>_da.{scs,mdl}, <CKT>_tran.{scs,mdl}
+├── SMC_{da,tran}.{scs,mdl}  top-level copies of the SMC testbenches
 ├── extra/                   six further topologies, not used in the paper
 └── design_space.json        device-size and supply bounds
 circuit_database/          ★ the Pareto-front database
@@ -98,7 +100,7 @@ docs/
 |---|---|---|
 | SMC | Single Miller Compensation | Allen & Holberg |
 | NGCC | Nested G<sub>m</sub>-C Compensation | You et al., JSSC 1997 |
-| DFCFC | Damping-Factor-Control Frequency Compensation | Leung et al., ISSCC 1999 |
+| DFCFC1 | Damping-Factor-Control Frequency Compensation | Leung et al., ISSCC 1999 |
 | TCFC | Transconductance with Capacitor Feedback Compensation | Peng & Sansen, JSSC 2005 |
 | IAC | Impedance Adapting Compensation | Peng et al., JSSC 2010 |
 | NMCNR | Nested Miller Compensation with Nulling Resistor | Leung & Mok, TCAS-I 2001 |
@@ -108,7 +110,7 @@ docs/
 
 Start with [`docs/paper_to_code.md`](docs/paper_to_code.md) if you are reading this alongside
 the paper — it maps every algorithm, table, and number to the file that produces it.
-[`docs/data_format.md`](docs/data_format.md) is worth a look before touching the CSVs; the
+Read [`docs/data_format.md`](docs/data_format.md) before touching the CSVs; the
 Pareto-staleness flag lives *inside* the ` solution path` column rather than in a column of
 its own, which surprises everyone the first time.
 
@@ -120,11 +122,13 @@ its own, which surprises everyone the first time.
                Database-Guided Methodology},
   author    = {Peng, Anlan and Liu, Chengjie and Du, Yuan and Du, Li},
   booktitle = {2026 International Symposium of Electronics Design Automation (ISEDA)},
-  pages     = {229--235},
   year      = {2026},
-  publisher = {IEEE}
+  note      = {To appear}
 }
 ```
+
+The proceedings are not yet indexed on IEEE Xplore; the citation will be updated after the
+official bibliographic record is available.
 
 ## License
 

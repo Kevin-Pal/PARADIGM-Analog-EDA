@@ -43,15 +43,16 @@ target variable for topology prediction.
 | ` Fitness` | — | Value of the scalarized objective (paper Eq. 3) at admission time. Comparable only *within* one weight vector |
 | ` time` | — | Timestamp such as `2025-0521-122240`; also the sub-directory name under `result_folder/` |
 | ` performance weight` | — | Depth-first weight vector, e.g. `[1, 1, 1]`. `1` → identity, `0` → square root, `-1` → log10 |
-| ` solution vector` | SI | All device parameters for this design (W/L, capacitors, resistors, bias current), serialised as a NumPy array — **may span several physical lines**, so parse with a real CSV reader |
+| ` solution vector` | SI | All device parameters for this design (W/L, capacitors, resistors, bias current), serialized as a NumPy array — **may span several physical lines**, so parse with a real CSV reader |
 | ` solution path` | — | Relative path to the evidence directory, **or the literal string `STALE`** |
 
 ### The `STALE` convention
 
 **`STALE` is not a column — it is written *into* the ` solution path` column.**
 
-The database only admits Pareto-optimal samples. When a new sample strictly dominates an
-existing record, the old record is *not* deleted: its ` solution path` is overwritten with
+The database admits only samples that are Pareto-optimal at the time of admission. When a new
+sample strictly dominates an existing record, the old record is *not* deleted: its
+` solution path` is overwritten with
 `STALE` and its evidence directory is removed from disk
 (see `add_datapoint2database` in `paradigm/netlist_utils.py`).
 
@@ -70,7 +71,7 @@ longer sit on the front. The paper trains P2C Net on all 378 SMC samples, not ju
 ## Size and coverage
 
 | Topology | Samples | Pareto-optimal | Params | Gain (dB) | GBW (MHz) | Pdiss (mW) |
-|---|---:|---:|---:|---|---|---|
+|---|---:|---:|---:|---:|---:|---:|
 | SMC | 378 | **169** | 11 | 51.9 – 100.7 | 1.31 – 172.30 | 0.068 – 6.82 |
 | NGCC | 434 | **104** | 30 | 137.0 – 146.9 | 7.27 – 60.59 | 0.743 – 10.29 |
 | IAC | 204 | **99** | 24 | 130.6 – 159.8 | 0.50 – 30.28 | 0.015 – 7.91 |

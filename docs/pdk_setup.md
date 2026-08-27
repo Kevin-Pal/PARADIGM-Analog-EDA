@@ -6,7 +6,7 @@ this repository ships with a placeholder `include` line that you must point at y
 
 ## 1. What to change
 
-Every `.scs` netlist under `circuits/` and `circuit_database/` contains:
+Every working `.scs` netlist under `circuits/` contains:
 
 ```spectre
 ; NOTE: replace with your own PDK model file. Original: CSMC 0.18um, sm1816m50v13_usage.scs, section=tt_lib
@@ -16,12 +16,12 @@ include "/path/to/your/pdk/model.scs" section=tt_lib
 Replace the path with your own model file. To rewrite them all at once:
 
 ```bash
-grep -rl '/path/to/your/pdk/model.scs' circuits circuit_database \
+grep -rl '/path/to/your/pdk/model.scs' circuits \
   | xargs sed -i 's|/path/to/your/pdk/model.scs|/opt/pdk/your_process/models.scs|g'
 ```
 
-Only the netlists under `circuits/` are used when you run anything; the ones under
-`circuit_database/` are historical per-sample records kept for provenance.
+The netlists under `circuit_database/` are historical per-sample records kept for provenance;
+do not rewrite them when configuring a new run.
 
 ## 2. What the netlists expect from your PDK
 
@@ -44,9 +44,9 @@ PM0 (net28 net27 VDD VDD) mp18 w=2e-07 l=5e-07    //// Load transistor, 1st stag
 
 ## 3. Design-space bounds
 
-`circuits/design_space.json` defines the search space the optimiser is allowed to explore:
+`circuits/design_space.json` defines the search space the optimizer is allowed to explore:
 
-```json
+```jsonc
 {
   "lmin": 500e-9,   "lmax": 2e-6,     // channel length bounds
   "wmin": 200e-9,   "wmax": 1000e-6,  // total channel width bounds
@@ -58,7 +58,7 @@ PM0 (net28 net27 VDD VDD) mp18 w=2e-07 l=5e-07    //// Load transistor, 1st stag
 ```
 
 Retune `lmin` / `lmax` / `wmin` / `wmax` / `VDD` for your node before running anything —
-the bounds are what the TuRBO trust regions are normalised against.
+the bounds are what the TuRBO trust regions are normalized against.
 
 ## 4. Simulator invocation
 
@@ -68,7 +68,7 @@ Performance is measured through MDL testbenches, one `.mdl` per analysis:
 cd <run_path> && spectremdl -batch <name>.mdl -design <name>.scs +mt=3
 ```
 
-Results are read back from the generated `<name>.measure`. Two testbenches per circuit:
+Results are read back from the generated `<name>.measure`. Each circuit has two testbenches:
 
 - `<CKT>_da.{scs,mdl}` — DC + AC/stability: `DC_gain`, `GBW_VOUT`, `PM_VOUT`, `GM_VOUT`, `UGB`, `Pdiss`
 - `<CKT>_tran.{scs,mdl}` — transient: `SR_N`, `SR_P`

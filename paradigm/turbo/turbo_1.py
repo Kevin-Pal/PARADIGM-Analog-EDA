@@ -244,7 +244,7 @@ class Turbo1:
             # Initialize parameters
             self._restart()
 
-            # Generate and evalute initial design points
+            # Generate and evaluate initial design points.
             X_init = latin_hypercube(self.n_init, self.dim)
             X_init = from_unit_cube(X_init, self.lb, self.ub)
             fX_init = np.array([[self.f(x)] for x in X_init])
@@ -271,7 +271,7 @@ class Turbo1:
                 # Standardize values
                 fX = deepcopy(self._fX).ravel()
 
-                # Create th next batch
+                # Create the next batch.
                 X_cand, y_cand, _ = self._create_candidates(
                     X, fX, length=self.length, n_training_steps=self.n_training_steps, hypers={}
                 )

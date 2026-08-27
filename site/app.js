@@ -331,6 +331,27 @@
   canvas.addEventListener("pointerleave", () => {
     if (!matchMedia("(hover: none)").matches) showTooltip(null);
   });
+  canvas.addEventListener("keydown", (event) => {
+    const navigationKeys = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "Escape"];
+    if (!navigationKeys.includes(event.key)) return;
+    event.preventDefault();
+
+    if (event.key === "Escape") {
+      showTooltip(null);
+      return;
+    }
+
+    const candidates = projected.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+    if (!candidates.length) return;
+    const activeIndex = candidates.findIndex((item) => item.point === activePoint);
+    let nextIndex;
+    if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = candidates.length - 1;
+    else if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = activeIndex < 0 ? 0 : Math.min(activeIndex + 1, candidates.length - 1);
+    else nextIndex = activeIndex < 0 ? candidates.length - 1 : Math.max(activeIndex - 1, 0);
+    showTooltip(candidates[nextIndex]);
+  });
+  canvas.addEventListener("blur", () => showTooltip(null));
 
   buildLegend();
 
@@ -353,8 +374,8 @@
   // Observe the wrapper, not the canvas. draw() writes canvas.width/height, which
   // changes the canvas's own layout size -- observing the canvas therefore feeds
   // straight back into draw() and spins forever (renderer freeze). The wrapper is
-  // sized by CSS, so it is a stable thing to watch. The re-entrancy flag is a
-  // second belt for the same trousers.
+  // sized by CSS, so it is stable to observe. The re-entrancy flag provides a
+  // second safeguard against feedback.
   let drawing = false;
   const safeDraw = () => {
     if (drawing) return;
