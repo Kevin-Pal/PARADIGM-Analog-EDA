@@ -4,6 +4,9 @@
 
 Official implementation and reproducibility package for the forthcoming ISEDA 2026 paper.
 
+**[Project page →](https://kevin-pal.github.io/PARADIGM-Analog-EDA/)** — method walkthrough and an
+interactive browser over all 1,818 simulated designs.
+
 PARADIGM turns analog circuit design into a database problem. It first spends compute *once*
 per topology to map out that topology's Pareto front, then reuses the resulting database to
 answer new design requests: pick the right topology, and warm-start the sizing so the

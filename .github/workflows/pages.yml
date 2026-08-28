@@ -1,17 +1,13 @@
 name: Deploy project site to GitHub Pages
 
-# Manual for now. GitHub Pages is not enabled on this repository yet -- it cannot be
-# while the repository is private on a free plan -- so an automatic push trigger would
-# fail on every commit with "Get Pages site failed".
-#
-# Once the repository is public and Pages is switched on
-# (Settings -> Pages -> Source: GitHub Actions), add the push trigger back:
-#
-#   on:
-#     push:
-#       branches: [main]
-#     workflow_dispatch:
+# Publishes site/ to https://kevin-pal.github.io/PARADIGM-Analog-EDA/
+# Requires Settings -> Pages -> Source: GitHub Actions (enabled 2026-08-28).
 on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
