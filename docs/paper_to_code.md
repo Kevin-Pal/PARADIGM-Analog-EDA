@@ -1,9 +1,12 @@
 # Paper → Code Map
 
-Every claim, algorithm, and number in the paper, mapped to the file that produces it.
+Implementation and stored evidence for the paper's methodology and experimental results.
+For publication details and evaluation scope, see [publication.md](publication.md).
 
 > **Paper.** A. Peng, C. Liu, Y. Du, L. Du, *"PARADIGM: Pareto-Optimized Analog Design via
-> Intelligent Database-Guided Methodology,"* ISEDA 2026 (to appear).
+> Intelligent Database-Guided Methodology,"* ISEDA 2026, IEEE, pp. 229–235.
+> [IEEE Xplore](https://ieeexplore.ieee.org/document/11751433) ·
+> [DOI: 10.1109/ISEDA70083.2026.11751433](https://doi.org/10.1109/ISEDA70083.2026.11751433).
 
 ## 1. Methodology (Paper §III)
 
@@ -29,7 +32,8 @@ Every claim, algorithm, and number in the paper, mapped to the file that produce
 
 ## 2. Experimental numbers
 
-Every figure below was checked against the shipped data files.
+The checks below record the August 2026 data audit and reruns. Simulator-dependent
+values are historical experimental evidence; a new closed-loop run needs Spectre and a PDK.
 
 | Paper claim | Source in this repo | Status |
 |---|---|---|
@@ -38,7 +42,7 @@ Every figure below was checked against the shipped data files.
 | P2C Net training set = 378 SMC samples (§IV-D) | `circuit_database/SMC/result.csv` — 378 rows | ✅ |
 | **Fig. 7**: 117 samples (50 Pareto) → 204 (99) after 20 BFS rounds | **IAC**: `result_20250521-232905_allweights.csv` (117/50) → `result_20250522-005729_allweights_nsga2.csv` (204/99) | ✅ *(note: these are IAC, not SMC)* |
 | **Table I**: six classifiers, Acc / Acc Std / F1-macro / fit & score time | `notebooks/05_topology_prediction.ipynb` | ✅ rerun 2026-08 — see [`reproduce.md`](reproduce.md) |
-| **Table II**: P2C Net / TuRBO / P2C Net + TuRBO, 12 values | `notebooks/06_parameter_tuning.ipynb`; measured values traceable to the simulator logs of that run | ✅ all 12 match |
+| **Table II**: P2C Net / TuRBO / P2C Net + TuRBO, circuit metrics and search cost | `notebooks/06_parameter_tuning.ipynb`; measured values traceable to the simulator logs of that run | ✅ stored outputs match; closed-loop rerun requires Spectre + PDK |
 | P2C Net final `L1 = 0.0447` after 20 000 epochs | `circuit_database/SMC/P2C_model/P2C_Net_FD_SMC_20250522-161012_history.csv`, last row `l1_param = 0.0446971`; weights in the matching `.pt` | ✅ |
 | Database coverage: gain 50–160 dB, power 3 µW – 40 mW (thesis §4.3.1) | measured across `circuit_database/*/result.csv`: **51.9–164.3 dB**, **0.003–40.05 mW** | ✅ |
 | P2C Net architecture 256/512/256 (§III-C) | `state_dict` of the shipped checkpoint: `3→256`, `256→512`, `512→256`, `256→11`, plus `input_scaler` and `FromUnicube` bounds | ✅ verified by loading the weights |

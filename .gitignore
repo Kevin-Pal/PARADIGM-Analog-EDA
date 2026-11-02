@@ -11,3 +11,6 @@ dist/
 .ruff_cache/
 .superdesign/
 .agents/
+
+# Published paper PDFs stay outside the public repository.
+/_paper/

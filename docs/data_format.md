@@ -112,20 +112,24 @@ oriented "bigger is better" the pair forms a genuine descending frontier.
 
 ## What it cost to build this database
 
-Every topology received the **same fixed search budget**, so the counts above compare
-topologies rather than effort:
+The representative experiment in paper §IV-B reports four depth-first TuRBO passes
+(50 iterations × batch 10 per pass, approximately 2,000 evaluations and 2,000 seconds),
+followed by NSGA-II with population 50 for 10 iterations (approximately 500 evaluations
+and 500 seconds). These describe the illustrated experiment, rather than a measured total
+for the entire released database. The Fig. 7 text also refers to “20 initial rounds”; use
+the named CSV snapshots when checking the before/after counts.
 
-| Stage | Six topologies | SMC (the paper's worked example) |
-|---|---|---|
-| Depth-first (TuRBO) | 4 weight vectors × 50 iterations × batch 10 ≈ 2,000 simulations | 4 × 100 iterations ≈ 4,000 |
-| Breadth-first (NSGA-II) | 10 generations × population 50 = 500 | 20 generations = 1,000, plus 100 further generations = 5,000 |
-| **Per topology** | **≈ 2,500 simulations, 40–80 min** | **≈ 10,000 simulations** |
+The notebooks preserve larger final settings: the standalone TuRBO example has
+`max_iters=100`, while the multi-topology loop has `max_iters=50`; NSGA-II uses `n_gen=100`
+in its standalone cell and `n_gen=50` in the six-topology loop, both with population 50.
+Initialization and any earlier runs add evaluations. Inspect these settings before launching
+a new simulator run; rerunning the notebooks can expand the existing database.
 
-Roughly **25,000 simulations and about ten hours** in total, on a single Intel i7-12700
-desktop at about one second per simulation.
+The 1,818 retained rows do not provide a complete simulator-call ledger. They cannot establish
+equal total effort across topologies or a measured full-database runtime.
 
-Equal budgets did not produce equal yields — NGCC contributed 434 designs and DFCFC1 only 55.
-A sample is stored only if it clears the validity screen (phase margin, gain margin, slew
+NGCC contributes 434 retained designs and DFCFC1 only 55, but counts alone do not explain
+that difference. A sample is stored only if it clears the validity screen (phase margin, gain margin, slew
 rate) *and* is not already dominated, but the database records only what was admitted, not
 what was attempted, so the counts on their own do not separate "harder topology" from
 "unluckier search".

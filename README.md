@@ -2,23 +2,29 @@
 
 **Pareto-Optimized Analog Design via Intelligent Database-Guided Methodology**
 
-Official implementation and reproducibility package for the forthcoming ISEDA 2026 paper.
+Official implementation and reproducibility package for the paper published in **ISEDA 2026**
+(IEEE, pp. 229–235).
+
+**[Paper on IEEE Xplore](https://ieeexplore.ieee.org/document/11751433)** ·
+**[DOI: 10.1109/ISEDA70083.2026.11751433](https://doi.org/10.1109/ISEDA70083.2026.11751433)** ·
+**[Publication details](docs/publication.md)**
 
 **[Project page →](https://kevin-pal.github.io/PARADIGM-Analog-EDA/)** — method walkthrough and an
 interactive browser over all 1,818 simulated designs.
 
 PARADIGM turns analog circuit design into a database problem. It first spends compute *once*
-per topology to map out that topology's Pareto front, then reuses the resulting database to
-answer new design requests: pick the right topology, and warm-start the sizing so the
-optimizer converges in tens of simulations instead of thousands.
+per topology to approximate that topology's Pareto front, then reuses the resulting database
+to recommend a topology and warm-start transistor sizing. In the paper's SMC example, this
+reduces the simulation count from 1,088 to 91.
 
 ---
 
 ## What is here
 
 Seven operational-amplifier topologies, explored at a 180 nm node, distilled into a
-**Pareto-front database of 1,818 simulated designs (634 of them Pareto-optimal)** — plus the
-code that built it and the two models that consume it.
+**database of 1,818 retained simulated designs (634 non-dominated within their respective
+topologies)** — plus the exploration code, topology classifiers, and P2C Net. These are
+accepted database records, rather than the total number of simulator evaluations.
 
 | Module | What it does | Paper |
 |---|---|---|
@@ -26,13 +32,20 @@ code that built it and the two models that consume it.
 | **TP** — topology prediction | Treats "which topology for these specs?" as multi-class classification over Pareto-optimal samples | §III-B |
 | **PT** — parameter tuning | P2C Net (an MLP from performance metrics to device sizes) supplies a simulation-free initial point; TuRBO refines it | §III-C |
 
-Headline results, all reproducible from this repository:
+Results reported in the paper:
 
-- Design-space exploration converges within **tens of minutes** per topology.
-- Topology prediction reaches **94.9 % accuracy** (random forest, five-fold CV).
-- Warm-started sizing hits the target in **9 iterations / 91 simulations / 80 s**, versus
-  **100 / 1088 / 946 s** cold — roughly a **10×** reduction
-  (reproduced with `scripts/run_sizing_warmstart.py` and `scripts/run_sizing.py`).
+- Design-space exploration completes within **tens of minutes** per topology under the
+  reported setup.
+- Topology prediction reaches **94.9% accuracy** (random forest, five-fold cross-validation
+  on the 634 database samples).
+- In the SMC sizing example, the warm start reaches the stopping criterion in
+  **9 iterations / 91 simulations / 80 s**, versus **100 / 1,088 / 946 s** cold — about
+  **12× fewer simulations and 12× shorter runtime** for that experiment.
+
+The shipped data support simulator-free analysis and classifier reruns. Repeating DSE or
+closed-loop sizing requires Spectre and a suitable PDK; measured runtimes and stochastic
+optimization results depend on the setup. See [`docs/reproduce.md`](docs/reproduce.md) for
+the recorded reruns and [`docs/publication.md`](docs/publication.md) for the evaluation scope.
 
 ## Quickstart
 
@@ -90,6 +103,7 @@ circuit_database/          ★ the Pareto-front database
 ├── <CKT>/result.csv         per-topology database
 └── SMC/P2C_model/           trained P2C Net checkpoints + loss histories
 docs/
+├── publication.md           published paper, citation, and evaluation scope
 ├── reproduce.md             how to re-derive each table and figure
 ├── data_format.md           CSV schema, units, and the STALE convention
 ├── pdk_setup.md             bringing your own PDK
@@ -126,12 +140,19 @@ its own, which surprises everyone the first time.
   author    = {Peng, Anlan and Liu, Chengjie and Du, Yuan and Du, Li},
   booktitle = {2026 International Symposium of Electronics Design Automation (ISEDA)},
   year      = {2026},
-  note      = {To appear}
+  pages     = {229--235},
+  publisher = {IEEE},
+  doi       = {10.1109/ISEDA70083.2026.11751433},
+  url       = {https://ieeexplore.ieee.org/document/11751433}
 }
 ```
 
-The proceedings are not yet indexed on IEEE Xplore; the citation will be updated after the
-official bibliographic record is available.
+Use this entry or [`CITATION.bib`](CITATION.bib) when citing the work. GitHub's
+**Cite this repository** menu uses [`CITATION.cff`](CITATION.cff) and its preferred paper citation.
+
+The published PDF is available through IEEE Xplore and is not redistributed in this repository.
+The repository's Apache-2.0 license applies to its code and accompanying materials; it does
+not grant rights to the IEEE-published article.
 
 ## License
 

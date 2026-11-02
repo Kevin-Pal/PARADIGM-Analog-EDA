@@ -1,5 +1,8 @@
 # Reproducing the Paper
 
+[Published paper and evaluation scope](publication.md) ·
+[IEEE Xplore](https://ieeexplore.ieee.org/document/11751433)
+
 ## 0. What needs a simulator, and what does not
 
 This is the first thing worth knowing. **The Pareto-front database is shipped with this
@@ -52,8 +55,9 @@ executed twice so that library drift can be told apart from run-to-run variance:
 | CART | 0.9318 | 0.9303 | 0.9319 | **no** |
 | Neural network | 0.9052 | 0.9194 | 0.8878 | **no** |
 
-Three classifiers land on the published accuracies exactly. XGBoost is stable but sits about
-0.005 low; histogram binning and tie-breaking changed between library versions.
+Random forest matches the published accuracy at the shown precision; kNN and SVM are
+within 0.0001 of the displayed paper values. XGBoost is stable but about 0.005 lower in these
+reruns. Library-version differences may contribute; these reruns do not isolate the cause.
 
 **CART and the MLP are not seeded, so expect them to move between runs.** The notebook builds
 its final estimator as `Model(**grid_search.best_params_)`, and `best_params_` does not carry
@@ -91,8 +95,15 @@ The remaining columns need Spectre:
   a batch of 10 samples with 11 parameters costs `10 × 11 × 2 = 220` simulations
 - the TuRBO refinement calls the simulator once per candidate
 
-Reported run: 9 iterations / 91 simulations / 80 s warm-started, versus
-100 iterations / 1088 simulations / 946 s from a cold start.
+Table II reports 9 iterations / 91 simulations / 80 s warm-started, versus
+100 iterations / 1,088 simulations / 946 s from a cold start. The warm start reaches the
+experiment's stopping criterion; its 99.60 dB gain is close to the 100 dB target. These are
+historical measurements for that SMC experiment, with approximately 12× reductions in both
+simulation count and runtime. A new run is stochastic and depends on the simulator, PDK,
+hardware, target, and stopping settings.
+
+The command-line drivers are `scripts/run_sizing_warmstart.py` and `scripts/run_sizing.py`;
+configure the simulator and PDK first as described in [pdk_setup.md](pdk_setup.md).
 
 ## 5. Building a database for a new topology *(simulator required)*
 
@@ -103,5 +114,15 @@ Reported run: 9 iterations / 91 simulations / 80 s warm-started, versus
 4. Run `01_dse_depth_first_turbo` with the four weight vectors
    `[1,1,1]`, `[1,0,−1]`, `[0,−1,1]`, `[−1,1,0]`, then `02_dse_breadth_first_nsga2`.
 
-Budget from the paper: ~4 000 simulations for depth-first plus ~1 000 for breadth-first per
-topology, 40–80 minutes on an i7-12700 at roughly one second per simulation.
+For the representative runs in §IV-B, four TuRBO passes × 50 iterations × batch 10 give
+approximately 2,000 simulations, followed by NSGA-II with population 50 for 10 generations
+(approximately 500 simulations). The paper also describes the Fig. 7 transition as “20
+initial rounds”; that wording differs from the stated 10-iteration setup. The supplied CSV
+snapshots establish the reported 117/50 → 204/99 sample counts independently of that wording.
+
+The saved notebook defaults differ from the illustrated paper setup: the standalone
+TuRBO cell uses 100 iterations, while the multi-topology loop uses 50; the NSGA-II cells
+use 100 and 50 generations respectively, with population 50. See
+[data_format.md](data_format.md#what-it-cost-to-build-this-database) before launching a run.
+The notebooks update the database in place, so use a separate clone for new exploration
+if you want to preserve the shipped CSVs for comparison.

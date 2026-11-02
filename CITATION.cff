@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you use PARADIGM, please cite the published paper in preferred-citation."
+type: software
+title: "PARADIGM: Official Implementation and Reproducibility Package"
+authors:
+  - family-names: Peng
+    given-names: Anlan
+  - family-names: Liu
+    given-names: Chengjie
+  - family-names: Du
+    given-names: Yuan
+  - family-names: Du
+    given-names: Li
+repository-code: "https://github.com/Kevin-Pal/PARADIGM-Analog-EDA"
+url: "https://kevin-pal.github.io/PARADIGM-Analog-EDA/"
+license: Apache-2.0
+preferred-citation:
+  type: conference-paper
+  title: "PARADIGM: Pareto-Optimized Analog Design via Intelligent Database-Guided Methodology"
+  authors:
+    - family-names: Peng
+      given-names: Anlan
+    - family-names: Liu
+      given-names: Chengjie
+    - family-names: Du
+      given-names: Yuan
+    - family-names: Du
+      given-names: Li
+  collection-title: "2026 International Symposium of Electronics Design Automation (ISEDA)"
+  year: 2026
+  start: 229
+  end: 235
+  publisher:
+    name: IEEE
+  doi: "10.1109/ISEDA70083.2026.11751433"
+  url: "https://ieeexplore.ieee.org/document/11751433"
